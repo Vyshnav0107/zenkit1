@@ -33,6 +33,10 @@ export class HomepageComponent {
     }
     this.activeTool = toolName;
   }
+  togglePomodoro() {
+  this.activeTool = this.activeTool === 'pomodoro' ? null : 'pomodoro';
+}
+
 
   home() {
     this.activeTool = null;

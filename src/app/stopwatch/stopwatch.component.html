@@ -1,40 +1,56 @@
 <div class="text-center p-4">
   <h2 class="font-bold text-xl mb-4">Stop Watch</h2>
 
-  <!-- Circular Gradient Border Wrapper -->
-  <div class="relative w-48 h-48 mx-auto mb-6">
+  <!-- Circular Gradient Border Wrapper with animation -->
+  <div class="relative sm:w-48 sm:h-48 w-36 h-36 mx-auto mb-6">
     <!-- Outer gradient circle -->
-    <div class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 p-1">
+    <div
+      class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 p-1"
+      [ngClass]="{ 'animate-pulse': running }"
+    >
       <!-- Inner white circle with time -->
-      <div class="bg-white rounded-full w-full h-full flex items-center justify-center text-2xl font-bold text-blue-800">
+      <div
+        class="bg-white rounded-full w-full h-full flex items-center justify-center text-2xl font-bold text-blue-800"
+      >
         {{ formatTime() }}
       </div>
     </div>
   </div>
 
-  <!-- Buttons -->
+  <!-- Buttons: Start/Pause & Reset -->
   <div class="flex justify-center space-x-4 mb-4">
-    <button (click)="startPause()" class="bg-blue-600 text-white px-6 py-2 rounded-md shadow">
+    <button
+      (click)="startPause()"
+      class="bg-blue-600 text-white px-6 py-2 rounded-md shadow transition duration-300 hover:scale-105"
+    >
       {{ running ? 'Pause' : 'Start' }}
     </button>
 
-    <button (click)="reset()" class="border border-blue-500 text-blue-600 px-6 py-2 rounded-md shadow">
+    <button
+      (click)="reset()"
+      class="border border-blue-500 text-blue-600 px-6 py-2 rounded-md shadow transition duration-300 hover:scale-105"
+    >
       Reset
     </button>
   </div>
 
-  <!-- Lap Button -->
+  <!-- Lap Button (only visible when running) -->
   <div *ngIf="running" class="flex justify-center mb-4">
-    <button (click)="lap()" class="bg-gradient-to-r from-blue-400 to-blue-600 text-white px-6 py-2 rounded-md shadow">
+    <button
+      (click)="lap()"
+      class="bg-gradient-to-r from-blue-400 to-blue-600 text-white px-6 py-2 rounded-md shadow transition duration-300 hover:scale-105"
+    >
       Lap
     </button>
   </div>
 
   <!-- Laps List -->
-  <div *ngIf="laps.length > 0" class="mt-4 text-left max-w-xs mx-auto">
-    <h3 class="font-semibold text-sm mb-2">Laps:</h3>
-    <ul class="text-sm space-y-1">
-      <li *ngFor="let lap of laps; let i = index">Lap {{ i + 1 }} - {{ lap }}</li>
+  <div *ngIf="laps.length > 0" class="mt-4 text-left max-w-xs mx-auto border border-blue-100 rounded-md p-3 shadow-sm bg-white">
+    <h3 class="font-semibold text-sm mb-2 text-blue-700">Laps:</h3>
+    <ul class="text-sm space-y-1 text-gray-700">
+      <li *ngFor="let lap of laps; let i = index">
+        <span class="font-medium">Lap {{ i + 1 }}</span> - {{ lap }}
+      </li>
     </ul>
   </div>
 </div>

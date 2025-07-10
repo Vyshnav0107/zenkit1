@@ -1,5 +1,5 @@
 <!-- ✅ Top Navigation Bar -->
-<header class="bg-white px-4 py-3 shadow-md flex justify-between items-center">
+<header class="bg-grey-500 px-4 py-3 shadow-md flex justify-between items-center">
   <div class="flex items-center space-x-2">
     <img src="assets/my-image.png" alt="Zenkit Logo" class="w-12 h-12">
     <span class="font-bold text-3xl">Zenkit</span>
@@ -99,16 +99,25 @@
   <app-pomodoro-timer></app-pomodoro-timer>
 </div>
 
+
+
 <!-- ✅ Bottom Navigation -->
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center h-16 shadow-md z-10">
-  <button (click)="toggleTool('dailyPlanner')" class="flex flex-col items-center p-2 rounded-md hover:bg-blue-100 transition">
-    <img src="assets/check.svg" class="w-6 h-6" alt="Daily Planner" />
-  </button>
+  <button
+  (click)="toggleTool('dailyPlanner')"
+  class="flex flex-col items-center p-2 rounded-full transition"
+  [ngClass]="{ 'bg-blue-100': activeTool === 'dailyPlanner' }"
+>
+  <img src="assets/check.svg" class="w-6 h-6" alt="Daily Planner" />
+</button>
 
-  <button (click)="toggleTool('pomodoro')" class="flex flex-col items-center p-2 rounded-md hover:bg-blue-100 transition">
-    <img src="assets/focus.svg" class="w-6 h-6" alt="Focus" />
-  </button>
-
+  <button
+  (click)="togglePomodoro()"
+  class="flex flex-col items-center p-2 rounded-full transition"
+  [ngClass]="{ 'bg-blue-100': activeTool === 'pomodoro' }"
+>
+  <img src="assets/focus.svg" class="w-6 h-6" alt="Pomodoro" />
+</button>
   <!-- Floating Home -->
   <div class="relative -top-6 z-20">
     <button
@@ -118,11 +127,15 @@
     </button>
   </div>
 
-  <button class="flex flex-col items-center p-2 rounded-md hover:bg-blue-100 transition">
+  <button class="flex flex-col items-center p-2 rounded-full hover:bg-blue-100 transition">
     <img src="assets/jot.svg" class="w-6 h-6" alt="Jot">
   </button>
 
-  <button (click)="toggleTool('stopwatch')" class="flex flex-col items-center p-2 rounded-md hover:bg-blue-100 transition">
-    <img src="assets/stopwatch.svg" class="w-6 h-6" alt="Stopwatch" />
-  </button>
+  <button
+  (click)="toggleTool('stopwatch')"
+  class="flex flex-col items-center p-2 rounded-full transition"
+  [ngClass]="{ 'bg-blue-100': activeTool === 'stopwatch' }"
+>
+  <img src="assets/stopwatch.svg" class="w-6 h-6" alt="Stopwatch" />
+</button>
 </nav>

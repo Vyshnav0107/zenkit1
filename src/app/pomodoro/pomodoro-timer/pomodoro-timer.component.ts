@@ -1,28 +1,40 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { PomodoroService } from '../pomodoro-service.service';
 
 @Component({
   selector: 'app-pomodoro-timer',
   templateUrl: './pomodoro-timer.component.html'
 })
-export class PomodoroTimerComponent implements OnInit {
+export class PomodoroTimerComponent implements OnInit, OnDestroy {
   focusTime = 25;
   shortBreakTime = 5;
   longBreakTime = 15;
   totalSessions = 4;
 
-  minutes: number = 25;
-  seconds: number = 0;
-  session: number = 1;
-  phase: string = 'Focus Time';
-  timer: any;
+  minutes = 25;
+  seconds = 0;
+  session = 1;
+  phase = 'Focus Time';
   isRunning = false;
+  timer: any = null;
   showSettingsModal = false;
+
+  // Click sound (used only for timer buttons)
+  clickSound = new Audio('assets/click.wav');
 
   constructor(private pomodoroService: PomodoroService) {}
 
   ngOnInit() {
     this.loadSettings();
+  }
+
+  ngOnDestroy() {
+    this.clearTimer();
+  }
+
+  private playClickSound() {
+    this.clickSound.currentTime = 0;
+    this.clickSound.play();
   }
 
   loadSettings() {
@@ -35,12 +47,14 @@ export class PomodoroTimerComponent implements OnInit {
   }
 
   startTimer() {
+    if (this.isRunning || this.timer) return;
+    this.playClickSound(); // ✅ Sound only here
+
     this.isRunning = true;
     this.timer = setInterval(() => {
       if (this.seconds === 0) {
         if (this.minutes === 0) {
-          clearInterval(this.timer);
-          this.isRunning = false;
+          this.clearTimer();
           this.handleSessionEnd();
         } else {
           this.minutes--;
@@ -52,12 +66,24 @@ export class PomodoroTimerComponent implements OnInit {
     }, 1000);
   }
 
-  resetTimer() {
-    clearInterval(this.timer);
+  clearTimer() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
     this.isRunning = false;
+  }
+
+  resetTimer() {
+    this.playClickSound(); // ✅ Sound here
+    this.clearTimer();
     this.session = 1;
     this.phase = 'Focus Time';
-    this.minutes = this.focusTime;
+    this.setTimerMinutes(this.focusTime);
+  }
+
+  setTimerMinutes(mins: number) {
+    this.minutes = mins;
     this.seconds = 0;
   }
 
@@ -65,26 +91,26 @@ export class PomodoroTimerComponent implements OnInit {
     if (this.phase === 'Focus Time') {
       if (this.session < this.totalSessions) {
         this.phase = 'Short Break';
-        this.minutes = this.shortBreakTime;
+        this.setTimerMinutes(this.shortBreakTime);
       } else {
         this.phase = 'Long Break';
-        this.minutes = this.longBreakTime;
+        this.setTimerMinutes(this.longBreakTime);
       }
       this.session++;
     } else {
       this.phase = 'Focus Time';
-      this.minutes = this.focusTime;
+      this.setTimerMinutes(this.focusTime);
     }
 
-    this.seconds = 0;
     this.startTimer();
   }
 
   openSettings() {
-    this.showSettingsModal = true;
+    this.showSettingsModal = true; // ❌ No sound here
   }
 
   saveSettings() {
+    this.playClickSound(); // ✅ Sound here
     this.showSettingsModal = false;
     this.resetTimer();
     this.pomodoroService.updateSettings({

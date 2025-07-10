@@ -11,7 +11,22 @@ export class StopwatchComponent implements OnDestroy {
   running = false;
   laps: string[] = [];
 
-  startPause() {
+  // Sound effect
+  clickSound = new Audio('assets/click.wav');
+
+  /**
+   * Play the click sound
+   */
+  playClickSound(): void {
+    this.clickSound.currentTime = 0;
+    this.clickSound.play();
+  }
+
+  /**
+   * Start or pause the stopwatch
+   */
+  startPause(): void {
+    this.playClickSound();
     if (this.running) {
       clearInterval(this.interval);
     } else {
@@ -20,26 +35,53 @@ export class StopwatchComponent implements OnDestroy {
     this.running = !this.running;
   }
 
-  reset() {
+  /**
+   * Reset the stopwatch and lap list
+   */
+  reset(): void {
+    this.playClickSound();
     clearInterval(this.interval);
     this.running = false;
     this.time = 0;
     this.laps = [];
   }
 
-  lap() {
-    const mins = Math.floor(this.time / 60000).toString().padStart(2, '0');
-    const secs = Math.floor((this.time % 60000) / 1000).toString().padStart(2, '0');
-    const lapTime = `${mins}:${secs}`;
-    this.laps.push(lapTime);
+  /**
+   * Record current lap time
+   */
+  lap(): void {
+    this.playClickSound();
+    this.laps.push(this.getFormattedTime());
   }
 
+  /**
+   * Get formatted time as hh:mm:ss
+   */
   formatTime(): string {
-    const mins = Math.floor(this.time / 60000).toString().padStart(2, '0');
-    const secs = Math.floor((this.time % 60000) / 1000).toString().padStart(2, '0');
-    return `00:${mins}:${secs}`;
+    return this.getFormattedTime(true);
   }
 
+  /**
+   * Shared time formatting logic
+   * @param includeHours whether to include `00:` prefix
+   */
+  private getFormattedTime(includeHours: boolean = false): string {
+    const mins = Math.floor(this.time / 60000);
+    const secs = Math.floor((this.time % 60000) / 1000);
+    const hours = Math.floor(mins / 60);
+
+    const formattedMins = (mins % 60).toString().padStart(2, '0');
+    const formattedSecs = secs.toString().padStart(2, '0');
+    const formattedHours = hours.toString().padStart(2, '0');
+
+    return includeHours
+      ? `${formattedHours}:${formattedMins}:${formattedSecs}`
+      : `${formattedMins}:${formattedSecs}`;
+  }
+
+  /**
+   * Cleanup interval on destroy
+   */
   ngOnDestroy(): void {
     clearInterval(this.interval);
   }

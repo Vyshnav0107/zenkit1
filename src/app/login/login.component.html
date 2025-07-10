@@ -20,145 +20,147 @@
   </button>
 </div>
 
-<!-- ✨ Auth Form Page -->
-<div *ngIf="showForm && !showVerification && !showUpdatePassword" class="min-h-screen bg-white text-black flex flex-col items-center justify-center px-4 sm:px-6 py-8 transition-opacity duration-700 animate-fade-in">
-  <!-- Logo and title - Better mobile alignment -->
-  <div class="flex items-center justify-center space-x-2 mb-4 w-full">
-    <img src="assets/my-image.png" alt="Zenkit Icon" class="w-12 h-12 sm:w-10 sm:h-10" />
-    <h2 class="text-2xl sm:text-2xl font-semibold">Zenkit</h2>
-  </div>
+<!-- ✨ Auth Form Card -->
+<div *ngIf="showForm && !showVerification && !showUpdatePassword"
+     class="min-h-screen bg-gray-100 flex items-center justify-center px-4 transition-opacity duration-700 animate-fade-in">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+    <!-- Logo -->
+    <div class="flex items-center justify-center mb-4">
+      <img src="assets/my-image.png" alt="Zenkit Logo" class="w-10 h-10" />
+      <h2 class="text-2xl font-semibold ml-2">Zenkit</h2>
+    </div>
+    <p class="text-sm text-center text-gray-600 mb-6">Start your journey to mindful productivity</p>
 
-  <p class="text-sm sm:text-sm text-gray-600 mb-6 text-center">Start your journey to mindful productivity.</p>
-
-  <!-- Tab Buttons - Full width on mobile -->
-  <div class="flex mb-6 w-full max-w-xs sm:max-w-sm rounded-full overflow-hidden border border-gray-300 text-sm">
-    <button class="flex-1 py-3 sm:py-2 font-medium transition-all duration-300"
-            [ngClass]="{ 'bg-white text-gray-700': isLoginMode, 'bg-gradient-to-r from-blue-300 to-blue-500 text-white': !isLoginMode }"
-            (click)="toggleFormMode('signup')">Sign Up</button>
-    <button class="flex-1 py-3 sm:py-2 font-medium transition-all duration-300"
-            [ngClass]="{ 'bg-white text-gray-700': !isLoginMode, 'bg-gradient-to-r from-blue-300 to-blue-500 text-white': isLoginMode }"
-            (click)="toggleFormMode('login')">Login</button>
-  </div>
-
-  <!-- 📝 Sign Up Form - Better mobile spacing -->
-  <form *ngIf="!isLoginMode" [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="w-full max-w-xs sm:max-w-sm space-y-4 sm:space-y-4 animate-fade-in">
-    <div>
-      <input type="text" placeholder="Full Name" formControlName="fullName" class="w-full px-4 py-3 sm:py-2 text-sm border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition" />
-      <div *ngIf="signupForm.get('fullName')?.touched && signupForm.get('fullName')?.invalid" class="text-red-500 text-xs mt-1 ml-3">Full Name is required</div>
+    <!-- Toggle Buttons -->
+    <div class="flex mb-6 rounded-full overflow-hidden border text-sm">
+      <button class="flex-1 py-2 font-medium"
+              [ngClass]="{ 'bg-white text-gray-700': isLoginMode, 'bg-gradient-to-r from-blue-300 to-blue-500 text-white': !isLoginMode }"
+              (click)="toggleFormMode('signup')">Sign Up</button>
+      <button class="flex-1 py-2 font-medium"
+              [ngClass]="{ 'bg-white text-gray-700': !isLoginMode, 'bg-gradient-to-r from-blue-300 to-blue-500 text-white': isLoginMode }"
+              (click)="toggleFormMode('login')">Login</button>
     </div>
 
-    <div>
-      <input type="email" placeholder="Email" formControlName="email" class="w-full px-4 py-3 sm:py-2 text-sm border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition" />
-      <div *ngIf="signupForm.get('email')?.touched && signupForm.get('email')?.invalid" class="text-red-500 text-xs mt-1 ml-3">Enter a valid email</div>
-    </div>
+    <!-- ✅ Sign Up Form -->
+    <form *ngIf="!isLoginMode" [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="space-y-4 animate-fade-in">
+      <!-- Full Name -->
+      <div>
+        <input type="text" placeholder="Full Name" formControlName="fullName"
+               class="w-full px-4 py-3 text-sm border rounded-full focus:ring-2 focus:ring-blue-400" />
+        <div *ngIf="signupForm.get('fullName')?.touched && signupForm.get('fullName')?.invalid"
+             class="text-red-500 text-xs mt-1 ml-3">Full Name is required</div>
+      </div>
 
-    
+      <!-- Email -->
+      <div>
+        <input type="email" placeholder="Email" formControlName="email"
+               class="w-full px-4 py-3 text-sm border rounded-full focus:ring-2 focus:ring-blue-400" />
+        <div *ngIf="signupForm.get('email')?.touched && signupForm.get('email')?.invalid"
+             class="text-red-500 text-xs mt-1 ml-3">Enter a valid email</div>
+      </div>
 
-    <div class="relative">
-      <input [type]="showPassword ? 'text' : 'password'" placeholder="Password" formControlName="password" class="w-full px-4 py-3 sm:py-2 text-sm border rounded-full pr-10 focus:outline-none focus:ring-2 focus:ring-blue-400 transition" />
-      <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer" (click)="toggleShowPassword()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-      </span>
-      <div *ngIf="signupForm.get('password')?.touched && signupForm.get('password')?.invalid" class="text-red-500 text-xs mt-1 ml-3">Password must be at least 6 characters</div>
-    </div>
+      <!-- Password -->
+      <div class="relative">
+        <input [type]="showPassword ? 'text' : 'password'" placeholder="Password" formControlName="password"
+               class="w-full px-4 py-3 text-sm border rounded-full pr-10 focus:ring-2 focus:ring-blue-400" />
+        <span class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer" (click)="toggleShowPassword()">👁️</span>
+        <div *ngIf="signupForm.get('password')?.touched && signupForm.get('password')?.invalid"
+             class="text-red-500 text-xs mt-1 ml-3">Password must be at least 6 characters</div>
+      </div>
 
-    <div class="relative">
-      <input [type]="showConfirmPassword ? 'text' : 'password'" placeholder="Confirm Password" formControlName="confirmPassword" class="w-full px-4 py-3 sm:py-2 text-sm border rounded-full pr-10 focus:outline-none focus:ring-2 focus:ring-blue-400 transition" />
-      <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer" (click)="toggleShowConfirmPassword()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-      </span>
-      <div *ngIf="signupForm.errors?.['mismatch'] && signupForm.get('confirmPassword')?.touched" class="text-red-500 text-xs mt-1 ml-3">Passwords do not match</div>
-    </div>
+      <!-- Confirm Password -->
+      <div class="relative">
+        <input [type]="showConfirmPassword ? 'text' : 'password'" placeholder="Confirm Password" formControlName="confirmPassword"
+               class="w-full px-4 py-3 text-sm border rounded-full pr-10 focus:ring-2 focus:ring-blue-400" />
+        <span class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer" (click)="toggleShowConfirmPassword()">👁️</span>
+        <div *ngIf="signupForm.errors?.['mismatch'] && signupForm.get('confirmPassword')?.touched"
+             class="text-red-500 text-xs mt-1 ml-3">Passwords do not match</div>
+      </div>
 
-    <button type="submit" class="w-full py-3 sm:py-2 text-sm bg-gradient-to-r from-blue-300 to-blue-500 text-white font-semibold rounded-full hover:shadow-md transition transform hover:scale-105 active:scale-95">
-      Create Account
-    </button>
-  </form>
+      <button type="submit"
+              class="w-full py-3 text-sm bg-gradient-to-r from-blue-300 to-blue-500 text-white rounded-full hover:scale-105 transition">
+        Create Account
+      </button>
+    </form>
 
-  <!-- 🔐 Login Form - Better mobile layout -->
-  <form *ngIf="isLoginMode" [formGroup]="loginForm" (ngSubmit)="onSubmitLogin()" class="w-full max-w-xs sm:max-w-sm space-y-4 animate-fade-in">
-   <div>
-  <input
-    type="text"
-    formControlName="email"
-    placeholder="Email"
-    class="w-full px-4 py-3 sm:py-2 text-sm border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-  />
-  <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors" class="text-red-500 text-xs mt-1 ml-3">
-    <div *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</div>
-    <div *ngIf="loginForm.get('email')?.errors?.['email']">Enter a valid email</div>
+    <!-- ✅ Login Form -->
+    <form *ngIf="isLoginMode" [formGroup]="loginForm" (ngSubmit)="onSubmitLogin()" class="space-y-4 animate-fade-in">
+      <input type="text" placeholder="Email" formControlName="email"
+             class="w-full px-4 py-3 text-sm border rounded-full focus:ring-2 focus:ring-blue-400" />
+      <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors"
+           class="text-red-500 text-xs mt-1 ml-3">
+        <div *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</div>
+        <div *ngIf="loginForm.get('email')?.errors?.['email']">Enter a valid email</div>
+      </div>
+
+      <div class="relative">
+        <input [type]="showLoginPassword ? 'text' : 'password'" placeholder="Password" formControlName="password"
+               class="w-full px-4 py-3 text-sm border rounded-full pr-10 focus:ring-2 focus:ring-blue-400" />
+        <span class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer" (click)="toggleShowLoginPassword()">👁️</span>
+        <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
+             class="text-red-500 text-xs mt-1 ml-3">Password is required</div>
+      </div>
+
+      <div class="text-right text-sm text-blue-500 hover:underline cursor-pointer" (click)="onForgotPassword()">
+        Forgot Password?
+      </div>
+
+      <button type="submit"
+              class="w-full py-3 bg-gradient-to-r from-blue-300 to-blue-500 text-white rounded-full hover:scale-105 transition">
+        Login
+      </button>
+    </form>
   </div>
 </div>
 
-    <div class="relative">
-      <input [type]="showLoginPassword ? 'text' : 'password'" formControlName="password" placeholder="Password" class="w-full px-4 py-3 sm:py-2 text-sm border rounded-full pr-10 focus:outline-none focus:ring-2 focus:ring-blue-400 transition" />
-      <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer" (click)="toggleShowLoginPassword()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-      </span>
-      <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="text-red-500 text-xs mt-1 ml-3">Password is required</div>
-    </div>
-
-    <div class="text-right text-sm text-blue-500 hover:underline cursor-pointer" (click)="onForgotPassword()">Forgot Password?</div>
-
-    <button type="submit" class="w-full py-3 sm:py-2 bg-gradient-to-r from-blue-300 to-blue-500 text-white font-semibold rounded-full hover:shadow-md transition transform hover:scale-105 active:scale-95">
-      Login
+<!-- 🔐 Verification Code -->
+<div *ngIf="showVerification && !showUpdatePassword"
+     class="min-h-screen bg-gray-100 flex items-center justify-center px-4 transition-opacity duration-700 animate-fade-in">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-sm p-8 space-y-4 text-center">
+    <img src="assets/my-image.png" alt="Zenkit Logo" class="w-10 h-10 mx-auto" />
+    <p class="text-sm text-gray-600">A code has been sent to your email</p>
+    <h3 class="text-base font-semibold">Enter Code</h3>
+    <input type="text" maxlength="6" placeholder="Enter Code"
+           class="w-full px-4 py-2 border rounded-full text-center text-sm focus:ring-2 focus:ring-blue-400" />
+    <button (click)="onVerifyCode()"
+            class="w-full py-2 bg-gradient-to-r from-blue-300 to-blue-500 text-white rounded-full hover:scale-105 transition">
+      Verify
     </button>
-  </form>
+  </div>
 </div>
 
-<!-- 🔐 Verification Code View - Centered on all devices -->
-<!-- 🔐 Verification Code View --> <div *ngIf="showVerification && !showUpdatePassword" class="min-h-screen bg-white text-black flex flex-col items-center justify-center px-4 sm:px-6 py-8 transition-opacity duration-700 animate-fade-in"> <div class="w-full max-w-sm space-y-4 text-center"> <img src="assets/my-image.png" alt="Zenkit Logo" class="w-10 h-10 mx-auto" /> <p class="text-sm text-gray-600">Welcome back. Let’s keep things in flow.</p> <h3 class="text-base font-semibold">Enter Code</h3> <p class="text-xs text-gray-500">A code has been sent to your email </p> <input type="text" maxlength="6" placeholder="Enter Code" class="w-full px-4 py-2 border rounded-full text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition" /> <button (click)="onVerifyCode()" class="w-full py-2 bg-gradient-to-r from-blue-300 to-blue-500 text-white font-semibold rounded-full hover:shadow-md transition transform hover:scale-105 active:scale-95" > Verify </button> </div> </div>
-<!-- 🔐 Update Password Form - Consistent with other forms -->
-<div *ngIf="showUpdatePassword" class="min-h-screen bg-white text-black flex flex-col items-center justify-center px-4 sm:px-6 py-8 transition-opacity duration-700 animate-fade-in">
-  <div class="w-full max-w-xs sm:max-w-sm space-y-6 text-center">
-    <img src="assets/my-image.png" alt="Zenkit Logo" class="w-12 h-12 mx-auto" />
-    <h3 class="text-xl font-semibold">Update Your Password</h3>
-    <p class="text-sm text-gray-500">Create a new secure password</p>
-
-   <form [formGroup]="updatePasswordForm" (ngSubmit)="onUpdatePassword()" class="space-y-4 text-left">
-
+<!-- 🔐 Update Password -->
+<div *ngIf="showUpdatePassword"
+     class="min-h-screen bg-gray-100 flex items-center justify-center px-4 transition-opacity duration-700 animate-fade-in">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-sm p-8 space-y-4">
+    <h3 class="text-xl font-semibold text-center">Update Your Password</h3>
+    <form [formGroup]="updatePasswordForm" (ngSubmit)="onUpdatePassword()" class="space-y-4">
       <div>
-        <label for="newPassword" class="block text-sm font-medium mb-1 ml-3">New Password</label>
+        <label class="block text-sm font-medium mb-1 ml-3">New Password</label>
         <div class="relative">
-          <input [type]="showNewPassword ? 'text' : 'password'" id="newPassword" formControlName="newPassword" placeholder="New Password" class="w-full px-4 py-3 sm:py-2 text-sm border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition" />
-          <span class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500" (click)="showNewPassword = !showNewPassword">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-          </span>
+          <input [type]="showNewPassword ? 'text' : 'password'" formControlName="newPassword"
+                 class="w-full px-4 py-3 text-sm border rounded-full focus:ring-2 focus:ring-blue-400" />
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                (click)="showNewPassword = !showNewPassword">👁️</span>
         </div>
-        <div *ngIf="updatePasswordForm.get('newPassword')?.touched && updatePasswordForm.get('newPassword')?.invalid" class="text-red-500 text-xs mt-1 ml-3">
-          Password must be at least 6 characters
-        </div>
+        <div *ngIf="updatePasswordForm.get('newPassword')?.touched && updatePasswordForm.get('newPassword')?.invalid"
+             class="text-red-500 text-xs mt-1 ml-3">Password must be at least 6 characters</div>
       </div>
 
       <div>
-        <label for="confirmNewPassword" class="block text-sm font-medium mb-1 ml-3">Confirm Password</label>
+        <label class="block text-sm font-medium mb-1 ml-3">Confirm Password</label>
         <div class="relative">
-          <input [type]="showConfirmNewPassword ? 'text' : 'password'" id="confirmNewPassword" formControlName="confirmNewPassword" placeholder="Confirm Password" class="w-full px-4 py-3 sm:py-2 text-sm border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition" />
-          <span class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500" (click)="showConfirmNewPassword = !showConfirmNewPassword">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-          </span>
+          <input [type]="showConfirmNewPassword ? 'text' : 'password'" formControlName="confirmNewPassword"
+                 class="w-full px-4 py-3 text-sm border rounded-full focus:ring-2 focus:ring-blue-400" />
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                (click)="showConfirmNewPassword = !showConfirmNewPassword">👁️</span>
         </div>
-        <div *ngIf="updatePasswordForm.errors?.['mismatch'] && updatePasswordForm.get('confirmNewPassword')?.touched" class="text-red-500 text-xs mt-1 ml-3">
-          Passwords do not match
-        </div>
+        <div *ngIf="updatePasswordForm.errors?.['mismatch'] && updatePasswordForm.get('confirmNewPassword')?.touched"
+             class="text-red-500 text-xs mt-1 ml-3">Passwords do not match</div>
       </div>
 
-      <button type="submit" class="w-full py-3 sm:py-2 bg-gradient-to-r from-blue-300 to-blue-500 text-white font-semibold rounded-full hover:shadow-md transition transform hover:scale-105 active:scale-95">
+      <button type="submit"
+              class="w-full py-3 bg-gradient-to-r from-blue-300 to-blue-500 text-white rounded-full hover:scale-105 transition">
         Update Password
       </button>
     </form>
