@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login',
@@ -24,7 +25,11 @@ export class LoginComponent {
   showNewPassword = false;
   showConfirmNewPassword = false;
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private authService: AuthService
+  ) {
     this.signupForm = this.fb.group(
       {
         fullName: ['', Validators.required],
@@ -36,14 +41,17 @@ export class LoginComponent {
     );
 
     this.loginForm = this.fb.group({
-  email: ['', [Validators.required, Validators.email]],
-  password: ['', Validators.required]
-});
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
+    });
 
-    this.updatePasswordForm = this.fb.group({
-      newPassword: ['', [Validators.required, Validators.minLength(6)]],
-      confirmNewPassword: ['', Validators.required],
-    }, { validators: this.updatePasswordMatchValidator });
+    this.updatePasswordForm = this.fb.group(
+      {
+        newPassword: ['', [Validators.required, Validators.minLength(6)]],
+        confirmNewPassword: ['', Validators.required],
+      },
+      { validators: this.updatePasswordMatchValidator }
+    );
   }
 
   onGetStarted() {
@@ -56,26 +64,61 @@ export class LoginComponent {
     this.showUpdatePassword = false;
   }
 
-  // 🔐 SIGNUP SUBMIT
+  // 🔐 SIGNUP
   onSubmit(): void {
     if (this.signupForm.valid) {
-      // simulate account creation and switch to login form
-      this.toggleFormMode('login');
+      const data = {
+        fullName: this.signupForm.value.fullName,
+        email: this.signupForm.value.email,
+        password: this.signupForm.value.password,
+      };
+
+      this.authService.signup(data).subscribe({
+        next: () => {
+          alert('Signup successful! Please login.');
+          this.toggleFormMode('login');
+        },
+        error: () => {
+          alert('Signup failed. Email may already be registered.');
+        },
+      });
     }
   }
 
-  // 🔐 LOGIN SUBMIT
+  // 🔐 LOGIN
   onSubmitLogin(): void {
     if (this.loginForm.valid) {
-      this.router.navigate(['/homepage']);
+      this.authService.login(this.loginForm.value).subscribe({
+        next: (res) => {
+          console.log('Login success:', res);
+          this.router.navigate(['/homepage']);
+        },
+        error: () => {
+          alert('Invalid credentials. Please try again.');
+        },
+      });
     }
   }
 
   // 🤔 FORGOT PASSWORD
   onForgotPassword(): void {
-    this.showVerification = true;
-    this.isLoginMode = false;
-    this.showUpdatePassword = false;
+    const email = this.loginForm.get('email')?.value;
+    if (!email) {
+      alert('Please enter your email before requesting reset.');
+      return;
+    }
+
+    this.authService.forgotPassword(email).subscribe({
+      next: () => {
+        alert('Reset code sent to your email.');
+        this.showVerification = true;
+        this.isLoginMode = false;
+        this.showUpdatePassword = false;
+      },
+      error: () => {
+        alert('Email not found.');
+      },
+    });
   }
 
   // ✅ VERIFY CODE
@@ -87,11 +130,22 @@ export class LoginComponent {
   // 🔁 UPDATE PASSWORD
   onUpdatePassword(): void {
     if (this.updatePasswordForm.valid) {
-      this.router.navigate(['/homepage']);
+      const token = 'dummyToken'; // Replace with real token from email
+      const newPassword = this.updatePasswordForm.get('newPassword')?.value;
+
+      this.authService.resetPassword(token, newPassword).subscribe({
+        next: () => {
+          alert('Password updated successfully.');
+          this.router.navigate(['/homepage']);
+        },
+        error: () => {
+          alert('Failed to reset password.');
+        },
+      });
     }
   }
 
-  // 🛡️ Password match check
+  // 🛡️ Match Validators
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password')?.value;
     const confirmPassword = form.get('confirmPassword')?.value;
