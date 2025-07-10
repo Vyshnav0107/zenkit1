@@ -1,0 +1,128 @@
+<!-- ✅ Top Navigation Bar -->
+<header class="bg-white px-4 py-3 shadow-md flex justify-between items-center">
+  <div class="flex items-center space-x-2">
+    <img src="assets/my-image.png" alt="Zenkit Logo" class="w-12 h-12">
+    <span class="font-bold text-3xl">Zenkit</span>
+  </div>
+
+  <div class="relative" (click)="toggleDropdown()" tabindex="0" (blur)="closeDropdown()">
+    <img src="https://img.icons8.com/color/48/user.png"
+         alt="User Avatar"
+         class="w-12 h-12 rounded-full border-4 border-white shadow-md ring-2 ring-blue-500 hover:ring-blue-700 transition duration-300 ease-in-out cursor-pointer" />
+
+    <!-- Dropdown -->
+    <div *ngIf="dropdownOpen"
+         class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-50 py-2 text-sm text-gray-700">
+      <div class="px-4 py-2 border-b font-medium">Hi, Diya</div>
+      <button (click)="signOut()"
+              class="block w-full bg-blue-400 text-left px-4 py-2 hover:bg-blue-600 transition">
+        Sign Out
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ✅ Homepage Content -->
+<div *ngIf="activeTool === null">
+  <!-- Greeting -->
+  <section class="bg-blue-100 mx-4 mt-4 p-4 rounded-xl text-center">
+    <h2 class="text-lg font-bold text-gray-800">Hi Diya,</h2>
+    <p class="text-md text-gray-700">Let's plan your day with calm and focus</p>
+    <img src="assets/welcome.png" alt="Planner Image" class="mx-auto mt-2 w-20 h-20">
+  </section>
+
+  <!-- Features -->
+  <main class="mt-4 space-y-4 px-4 max-w-screen mx-auto overflow-x-hidden mb-28">
+
+    <!-- ✅ Daily Planner -->
+    <div class="relative group">
+      <button
+        (click)="toggleTool('dailyPlanner')"
+        class="w-full text-left bg-white rounded-lg shadow p-4 flex items-start space-x-3 transition-transform duration-300 transform group-hover:scale-105">
+        <img src="assets/check.svg" class="w-6 h-6 mt-1" alt="Check Icon">
+        <div>
+          <h3 class="font-semibold text-gray-800">Plan What Matters</h3>
+          <p class="text-sm text-gray-600">Organize your day with simple, actionable tasks.</p>
+        </div>
+      </button>
+    </div>
+
+    <!-- ✅ Pomodoro -->
+    <div class="relative group">
+      <button
+        (click)="toggleTool('pomodoro')"
+        class="w-full text-left bg-white rounded-lg shadow p-4 flex items-start space-x-3 transition-transform duration-300 transform group-hover:scale-105">
+        <img src="assets/focus.svg" class="w-6 h-6 mt-1" alt="Focus Icon">
+        <div>
+          <h3 class="font-semibold text-gray-800">Find Your Focus</h3>
+          <p class="text-sm text-gray-600">Work in calming intervals with the 25-5 technique.</p>
+        </div>
+      </button>
+    </div>
+
+    <!-- ✅ Jot -->
+    <div class="relative group">
+      <button class="w-full text-left bg-white rounded-lg shadow p-4 flex items-start space-x-3 transition-transform duration-300 transform group-hover:scale-105">
+        <img src="assets/jot.svg" class="w-6 h-6 mt-1" alt="Jot Icon">
+        <div>
+          <h3 class="font-semibold text-gray-800">Capture Every Thought</h3>
+          <p class="text-sm text-gray-600">Jot down notes, reminders, and inspiration instantly.</p>
+        </div>
+      </button>
+    </div>
+
+    <!-- ✅ Stopwatch -->
+    <div class="relative group">
+      <button
+        (click)="toggleTool('stopwatch')"
+        class="w-full text-left bg-white rounded-lg shadow p-4 flex items-start space-x-3 transition-transform duration-300 transform group-hover:scale-105">
+        <img src="assets/stopwatch.svg" class="w-6 h-6 mt-1" alt="Stopwatch Icon" />
+        <div>
+          <h3 class="font-semibold text-gray-800">Track Every Second</h3>
+          <p class="text-sm text-gray-600">Stay aware of how you spend time with precision.</p>
+        </div>
+      </button>
+    </div>
+  </main>
+</div>
+
+<!-- ✅ Render Tools -->
+<div *ngIf="activeTool === 'stopwatch'">
+  <app-stopwatch></app-stopwatch>
+</div>
+
+<div *ngIf="activeTool === 'dailyPlanner'">
+  <app-daily-planner></app-daily-planner>
+</div>
+
+<div *ngIf="activeTool === 'pomodoro'">
+  <app-pomodoro-timer></app-pomodoro-timer>
+</div>
+
+<!-- ✅ Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center h-16 shadow-md z-10">
+  <button (click)="toggleTool('dailyPlanner')" class="flex flex-col items-center p-2 rounded-md hover:bg-blue-100 transition">
+    <img src="assets/check.svg" class="w-6 h-6" alt="Daily Planner" />
+  </button>
+
+  <button (click)="toggleTool('pomodoro')" class="flex flex-col items-center p-2 rounded-md hover:bg-blue-100 transition">
+    <img src="assets/focus.svg" class="w-6 h-6" alt="Focus" />
+  </button>
+
+  <!-- Floating Home -->
+  <div class="relative -top-6 z-20">
+    <button
+      (click)="home()"
+      class="bg-blue-300 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-blue-700 transition duration-300">
+      <img src="assets/home.svg" class="w-7 h-7" alt="Home" />
+    </button>
+  </div>
+
+  <button class="flex flex-col items-center p-2 rounded-md hover:bg-blue-100 transition">
+    <img src="assets/jot.svg" class="w-6 h-6" alt="Jot">
+  </button>
+
+  <button (click)="toggleTool('stopwatch')" class="flex flex-col items-center p-2 rounded-md hover:bg-blue-100 transition">
+    <img src="assets/stopwatch.svg" class="w-6 h-6" alt="Stopwatch" />
+  </button>
+</nav>
