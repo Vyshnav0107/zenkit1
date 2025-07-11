@@ -30,6 +30,7 @@ export class LoginComponent {
     private router: Router,
     private authService: AuthService
   ) {
+    // SignUp Form
     this.signupForm = this.fb.group(
       {
         fullName: ['', Validators.required],
@@ -40,11 +41,13 @@ export class LoginComponent {
       { validators: this.passwordMatchValidator }
     );
 
+    // Login Form
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
     });
 
+    // Update Password Form
     this.updatePasswordForm = this.fb.group(
       {
         newPassword: ['', [Validators.required, Validators.minLength(6)]],
@@ -54,17 +57,19 @@ export class LoginComponent {
     );
   }
 
+  // Show main form
   onGetStarted() {
     this.showForm = true;
   }
 
+  // Toggle between SignUp and Login
   toggleFormMode(mode: 'signup' | 'login') {
     this.isLoginMode = mode === 'login';
     this.showVerification = false;
     this.showUpdatePassword = false;
   }
 
-  // 🔐 SIGNUP
+  // 🟢 SIGNUP
   onSubmit(): void {
     if (this.signupForm.valid) {
       const data = {
@@ -74,13 +79,22 @@ export class LoginComponent {
       };
 
       this.authService.signup(data).subscribe({
-        next: () => {
-          alert('Signup successful! Please login.');
-          this.toggleFormMode('login');
+        next: (res) => {
+          console.log('Signup success:', res);
+         
+
+          // ✅ Show login form
+          this.isLoginMode = true;
+          this.showVerification = false;
+          this.showUpdatePassword = false;
+
+          // Optionally reset signup form
+          this.signupForm.reset();
         },
-        error: () => {
-          alert('Signup failed. Email may already be registered.');
-        },
+       error: (err) => {
+  console.error('Signup error:', err);
+  alert(`Signup failed: ${err.status} - ${err.message}`);
+}
       });
     }
   }
@@ -88,23 +102,30 @@ export class LoginComponent {
   // 🔐 LOGIN
   onSubmitLogin(): void {
     if (this.loginForm.valid) {
+      console.log('Login form submitted with:', this.loginForm.value);
+
       this.authService.login(this.loginForm.value).subscribe({
         next: (res) => {
           console.log('Login success:', res);
+           this.showToastMessage('Login successful!');
+        setTimeout(() => {
           this.router.navigate(['/homepage']);
-        },
-        error: () => {
+        }, 1000); // Delay redirect to let toast show
+      },
+        error: (err) => {
+          console.error('Login failed:', err);
           alert('Invalid credentials. Please try again.');
         },
       });
     }
+    
   }
 
-  // 🤔 FORGOT PASSWORD
+  // 🔁 FORGOT PASSWORD
   onForgotPassword(): void {
     const email = this.loginForm.get('email')?.value;
     if (!email) {
-      alert('Please enter your email before requesting reset.');
+      alert('Please enter your email before requesting a reset.');
       return;
     }
 
@@ -115,7 +136,8 @@ export class LoginComponent {
         this.isLoginMode = false;
         this.showUpdatePassword = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Forgot password error:', err);
         alert('Email not found.');
       },
     });
@@ -123,14 +145,15 @@ export class LoginComponent {
 
   // ✅ VERIFY CODE
   onVerifyCode(): void {
+    // Simulate code verification success
     this.showVerification = false;
     this.showUpdatePassword = true;
   }
 
-  // 🔁 UPDATE PASSWORD
+  // 🔁 RESET PASSWORD
   onUpdatePassword(): void {
     if (this.updatePasswordForm.valid) {
-      const token = 'dummyToken'; // Replace with real token from email
+      const token = 'dummyToken'; // Replace with actual token logic
       const newPassword = this.updatePasswordForm.get('newPassword')?.value;
 
       this.authService.resetPassword(token, newPassword).subscribe({
@@ -138,14 +161,15 @@ export class LoginComponent {
           alert('Password updated successfully.');
           this.router.navigate(['/homepage']);
         },
-        error: () => {
+        error: (err) => {
+          console.error('Reset password failed:', err);
           alert('Failed to reset password.');
         },
       });
     }
   }
 
-  // 🛡️ Match Validators
+  // ✅ Password match validators
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password')?.value;
     const confirmPassword = form.get('confirmPassword')?.value;
@@ -158,6 +182,7 @@ export class LoginComponent {
     return newPassword === confirmNewPassword ? null : { mismatch: true };
   }
 
+  // 🧠 Input helpers
   blockNonNumeric(event: KeyboardEvent) {
     const pattern = /[0-9]/;
     if (!pattern.test(event.key)) {
@@ -165,7 +190,7 @@ export class LoginComponent {
     }
   }
 
-  // 👁️ TOGGLE PASSWORD VISIBILITY
+  // 👁️ Password visibility toggles
   toggleShowPassword() {
     this.showPassword = !this.showPassword;
   }
@@ -185,4 +210,14 @@ export class LoginComponent {
   toggleShowConfirmNewPassword() {
     this.showConfirmNewPassword = !this.showConfirmNewPassword;
   }
+  toastMessage = '';
+showToast = false;
+
+showToastMessage(message: string) {
+  this.toastMessage = message;
+  this.showToast = true;
+  setTimeout(() => {
+    this.showToast = false;
+  }, 2000); // Toast visible for 2 seconds
+}
 }
