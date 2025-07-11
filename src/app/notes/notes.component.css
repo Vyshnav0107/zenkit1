@@ -1,0 +1,10 @@
+:host {
+  display: block;
+  background: #f9fafb;
+  min-height: 100vh;
+  padding-bottom: 6rem; /* to avoid overlap with bottom nav */
+}
+
+button:focus {
+  outline: none;
+}

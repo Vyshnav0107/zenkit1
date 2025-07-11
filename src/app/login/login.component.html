@@ -4,29 +4,28 @@
   class="bg-gradient-to-br from-blue-100 via-indigo-200 to-pink-100 min-h-screen text-black flex flex-col items-center justify-center px-4 sm:px-6 text-center"
 >
   <!-- 🌟 Logo -->
+<!-- 🌟 Logo -->
+<!-- 🌟 Combined Hero Section -->
+<!-- 🌟 Combined Hero Section -->
+<div class="flex flex-col items-center space-y-[6px]">
   <img
     src="assets/zenlogo.png"
     alt="Zenkit Logo"
-    class="logo-animation w-48 sm:w-44 md:w-52 lg:w-60 h-64 opacity-0 transition-opacity duration-1000 mb-0"
+    class="ml-6 logo-animation w-24 sm:w-32 md:w-36 lg:w-40 h-auto opacity-0 transition-opacity duration-1000"
   />
 
-  <!-- 🌟 Zenkit Title -->
   <h1
-    class="zenkit-text text-3xl sm:text-3xl md:text-4xl lg:text-5xl font-bold opacity-0 transition-opacity duration-1000 delay-200 mt-1"
+    class="zenkit-text text-3xl sm:text-4xl md:text-5xl font-bold opacity-0 transition-opacity duration-1000 delay-200"
   >
     Zenkit
   </h1>
 
-  <!-- 🌟 Taglines + Button (fade together) -->
-  <div class="fade-group opacity-0 flex flex-col items-center space-y-2 mt-3">
-    <p class="tagline text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl max-w-xs sm:max-w-md md:max-w-xl leading-tight">
-      Track. Plan. Focus.
-    </p>
-    <p class="tagline text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl max-w-xs sm:max-w-md md:max-w-xl leading-tight">
-      All in one place.
-    </p>
+  <div
+    class="fade-group opacity-0 transition-opacity duration-1000 delay-300 ease-out flex flex-col items-center space-y-1"
+  >
+    <p class="text-base font-medium text-gray-800">Track. Plan. Focus.</p>
+    <p class="text-base font-medium text-gray-800">All in one place.</p>
 
-    <!-- 🌟 Button -->
     <button
       (click)="onGetStarted()"
       class="mt-3 px-8 py-3 text-sm sm:text-base font-semibold text-white rounded-full bg-gradient-to-r from-blue-300 to-blue-600 shadow-md hover:shadow-lg transition duration-300 transform hover:scale-105 active:scale-95"
@@ -37,16 +36,21 @@
 </div>
 
 
+</div>
+
+
 
 
 <div class="relative">
   <!-- Toast inside this block -->
   <div
-    *ngIf="showToast"
-    class="absolute top-0 left-1/2 transform -translate-x-1/2 mt-2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50"
-  >
-    {{ toastMessage }}
-  </div>
+  *ngIf="showToast"
+  [ngClass]="toastColor"
+  class="fixed top-5 left-1/2 transform -translate-x-1/2 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300 ease-in-out"
+>
+  {{ toastMessage }}
+</div>
+
 <!-- ✨ Auth Form Card -->
 <div *ngIf="showForm && !showVerification && !showUpdatePassword" class="bg-gradient-to-br from-blue-100 via-indigo-200 to-pink-100  min-h-screen bg-gray-100 flex items-center justify-center px-4 transition-opacity duration-700 animate-fade-in">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
@@ -117,15 +121,40 @@
 </div>
 
 <!-- 🔐 Verification Code -->
-<div *ngIf="showVerification && !showUpdatePassword" class="bg-gradient-to-br from-blue-100 via-indigo-200 to-pink-100  min-h-screen bg-gray-100 flex items-center justify-center px-4 transition-opacity duration-700 animate-fade-in">
+<div *ngIf="showVerification && !showUpdatePassword" class="bg-gradient-to-br from-blue-100 via-indigo-200 to-pink-100 min-h-screen flex items-center justify-center px-4 transition-opacity duration-700 animate-fade-in">
   <div class="bg-white rounded-2xl shadow-lg w-full max-w-sm p-8 space-y-4 text-center">
-    <img src="assets/my-image.png" alt="Zenkit Logo" class="w-10 h-10 mx-auto" />
+   
+
+    <!-- 🔄 Logo + Zenkit in a row -->
+    <div class="flex items-center justify-center gap-2 mb-2">
+      <img src="assets/my-image.png" alt="Zenkit Logo" class="w-10 h-10" />
+      <h2 class="text-xl font-bold">Zenkit</h2>
+    </div>
+
+    <h3 class="text-base font-semibold">Welcome back. Let's keep things in flow.</h3>
     <p class="text-sm text-gray-600">A code has been sent to your email</p>
-    <h3 class="text-base font-semibold">Enter Code</h3>
-    <input type="text" maxlength="6" placeholder="Enter Code" class="w-full px-4 py-2 border rounded-full text-center text-sm focus:ring-2 focus:ring-blue-400" />
-    <button (click)="onVerifyCode()" class="w-full py-2 bg-gradient-to-r from-blue-300 to-blue-500 text-white rounded-full hover:scale-105 transition">Verify</button>
+    
+    <input
+      type="text"
+      maxlength="6"
+      placeholder="Enter Code"
+      class="w-full px-4 py-2 border rounded-full text-center text-sm focus:ring-2 focus:ring-blue-400"
+    />
+    <button
+      (click)="onVerifyCode()"
+      class="w-full py-2 bg-gradient-to-r from-blue-300 to-blue-500 text-white rounded-full hover:scale-105 transition"
+    >
+      Verify
+    </button>
+    <button 
+  (click)="onBackFromVerification()" 
+  class="text-sm text-blue-600 hover:underline mt-4">
+  ← Back to Login
+</button>
+
   </div>
 </div>
+
 
 <!-- 🔐 Update Password -->
 <div *ngIf="showUpdatePassword" class="bg-gradient-to-br from-blue-100 via-indigo-200 to-pink-100  min-h-screen bg-gray-100 flex items-center justify-center px-4 transition-opacity duration-700 animate-fade-in">
@@ -150,8 +179,21 @@
         <div *ngIf="updatePasswordForm.errors?.['mismatch'] && updatePasswordForm.get('confirmNewPassword')?.touched" class="text-red-500 text-xs mt-1 ml-3">Passwords do not match</div>
       </div>
 
-      <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-300 to-blue-500 text-white rounded-full hover:scale-105 transition"
-              [disabled]="updatePasswordForm.invalid">Update Password</button>
+      <button 
+  type="submit" 
+  class="w-full py-3 bg-gradient-to-r from-blue-300 to-blue-500 text-white rounded-full hover:scale-105 transition"
+  [disabled]="updatePasswordForm.invalid">
+  Update Password
+</button>
+
+<!-- Back to Login Button (Centered & Responsive) -->
+<div class="flex justify-center mt-4">
+  <button 
+    (click)="onBackFromVerification()" 
+    class="text-sm text-blue-600 hover:underline text-center">
+    ← Back to Login
+  </button>
+</div>
     </form>
   </div>
 </div>

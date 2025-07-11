@@ -1,0 +1,135 @@
+  <!-- ✅ Header -->
+  <header class="flex justify-between items-center px-4 py-3 bg-white shadow-sm">
+    <div class="text-lg font-semibold text-gray-800">
+      {{ isEditMode ? 'Select items ' + selectedNotesCount : 'All Notes' }}
+    </div>
+    <div class="flex items-center space-x-4" *ngIf="!isCreatingNote">
+      <button (click)="openSearch()">
+        <img src="assets/search.svg" alt="Search" class="w-7 h-7" />
+      </button>
+      <button (click)="toggleEditMode()">
+        <img src="assets/edit.svg" alt="Edit" class="w-7 h-7" />
+      </button>
+    </div>
+  </header>
+
+  <!-- ✅ Search Overlay -->
+  <div *ngIf="showSearch" class="fixed inset-0 bg-white z-50 p-4">
+    <div class="flex items-center gap-2 mb-4">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+        placeholder="Search notes..."
+        class="flex-1 px-4 py-2 border rounded-full text-sm sm:text-base"
+      />
+      <button (click)="closeSearch()" class="text-indigo-600 text-sm sm:text-base">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- ✅ Add/Edit Note Full Page -->
+  <div *ngIf="isCreatingNote" class="fixed inset-0 bg-white z-40 p-4 flex flex-col">
+    <header class="flex justify-between items-center mb-4">
+      <button (click)="cancelNewNote()" class="text-gray-600 text-sm font-medium">Cancel</button>
+      <button
+        (click)="saveNewNote()"
+        [disabled]="!newNoteTitle.trim() && !newNoteBody.trim()"
+        class="text-blue-600 text-sm font-medium disabled:opacity-50"
+      >
+        Save
+      </button>
+    </header>
+
+    <!-- ✅ Title Input -->
+    <input
+      [(ngModel)]="newNoteTitle"
+      placeholder="Title"
+      class="text-base sm:text-lg font-bold text-gray-900 border-none outline-none mb-2"
+    />
+
+    <!-- ✅ Body Textarea -->
+    <textarea
+      [(ngModel)]="newNoteBody"
+      placeholder="Write your note here..."
+      class="flex-1 w-full border-none outline-none resize-none text-base text-gray-800"
+      rows="10"
+    ></textarea>
+  </div>
+
+  <!-- ✅ No Notes Found -->
+  <div *ngIf="filteredNotes.length === 0 && !isCreatingNote" class="text-center text-gray-500 py-10">
+    No notes found.
+  </div>
+
+  <!-- ✅ Notes Grid -->
+  <main
+    *ngIf="!isCreatingNote"
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4 mt-4 mb-36"
+  >
+    <div
+      *ngFor="let note of filteredNotes; let i = index"
+      (click)="!isEditMode && editNote(i)"
+      class="bg-white rounded-xl shadow-md p-4 flex flex-col justify-between min-h-[100px] relative cursor-pointer"
+    >
+      <div class="flex justify-between items-start">
+        <div class="pr-2">
+          <!-- ✅ Note Title -->
+          <div class="font-bold text-sm sm:text-base text-gray-900">
+            {{ note.title }}
+          </div>
+
+          <!-- ✅ Note Body -->
+          <div class="text-gray-700 text-sm sm:text-base mt-1 line-clamp-4">
+            {{ note.body }}
+          </div>
+        </div>
+
+        <!-- ✅ Checkbox in Edit Mode -->
+        <input
+          *ngIf="isEditMode"
+          type="checkbox"
+          [(ngModel)]="note.selected"
+          (ngModelChange)="onCheckboxChange()"
+          (click)="$event.stopPropagation()"
+        />
+      </div>
+      <div class="text-xs text-gray-500 text-right mt-2">{{ note.date }}</div>
+    </div>
+  </main>
+
+  <!-- ✅ Floating Delete Button -->
+  <div
+    *ngIf="isEditMode && selectedNotesCount > 0 && !isDeleteConfirmVisible"
+    class="fixed bottom-28 left-0 w-full flex justify-center z-40"
+  >
+    <div class="bg-white px-8 py-3 rounded-xl shadow-md flex items-center space-x-4">
+      <img src="assets/delete.png" alt="Delete" class="w-5 h-5" />
+      <button (click)="showDeleteCard()" class="text-base">Delete</button>
+    </div>
+  </div>
+
+  <!-- ✅ Delete Confirmation Card -->
+  <div
+    *ngIf="isDeleteConfirmVisible"
+    class="fixed bottom-0 left-0 w-full bg-white rounded-t-xl px-6 py-4 shadow-xl z-60 pb-28"
+  >
+    <p class="text-center font-semibold text-base mb-2">Delete selected notes?</p>
+    <p class="text-xs text-gray-500 text-center mb-4">
+      All selected notes will be permanently deleted.
+    </p>
+    <div class="flex justify-around text-sm">
+      <button (click)="cancelDelete()" class="text-indigo-600 font-semibold">Cancel</button>
+      <button (click)="deleteSelectedNotes()" class="text-red-600 font-semibold">Delete</button>
+    </div>
+  </div>
+
+  <!-- ✅ Floating Add Button -->
+  <button
+    *ngIf="!isCreatingNote"
+    (click)="addNote()"
+    class="fixed bottom-24 right-4 sm:right-6 bg-blue-500 hover:bg-blue-700 text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-lg transition duration-300 z-30"
+  >
+    +
+  </button>

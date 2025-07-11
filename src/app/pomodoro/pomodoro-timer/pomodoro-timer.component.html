@@ -1,15 +1,40 @@
-<!-- pomodoro-timer.component.html -->
 <div class="flex flex-col items-center justify-between min-h-screen bg-gray-50 py-6 px-4 relative">
 
-  <!-- Timer Section -->
+  <!-- Completion Screen -->
+<div *ngIf="showCompletionScreen" class="flex flex-col flex-grow items-center justify-center text-center px-4 py-8">
   <div class="flex flex-col items-center">
+    <h1 class="text-3xl font-bold bg-indigo-400 text-white px-8 py-2 rounded-3xl mb-4">
+      Great Job Today!
+    </h1>
+    <p class="text-gray-600 mb-4">You've completed all your Pomodoro sessions.</p>
+
+    <div class="bg-indigo-200 text-indigo-800 px-6 py-3 rounded-2xl mb-3">
+      Pomodoros completed : {{ totalSessions }}
+    </div>
+    <div class="bg-indigo-200 text-indigo-800 px-6 py-3 rounded-2xl mb-3">
+      Total focus time : {{ totalSessions * focusTime }} min
+    </div>
+    <div class="bg-indigo-200 text-indigo-800 px-6 py-3 rounded-2xl">
+      Total break time : {{ (totalSessions - 1) * shortBreakTime + longBreakTime }} min
+    </div>
+
+    <button class="mt-6 bg-indigo-500 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition"
+            (click)="resetTimer()">
+      Restart
+    </button>
+  </div>
+</div>
+
+  <!-- Timer Section -->
+  <div *ngIf="!showCompletionScreen" class="flex flex-col items-center">
     <h2 class="text-xl font-bold mb-2">Pomodoro Timer</h2>
     <button class="absolute top-6 right-6" (click)="openSettings()">
       <img src="assets/gear.svg" alt="Settings Icon" class="w-6 h-6">
     </button>
 
     <!-- Timer Circle -->
-    <div class="w-48 h-48 rounded-full border-[10px] border border-[#A5B4FC] flex items-center justify-center text-3xl font-bold text-gray-800 mb-4">
+    <div
+      class="w-48 h-48 rounded-full border-[10px] border border-[#A5B4FC] flex items-center justify-center text-3xl font-bold text-gray-800 mb-4">
       {{ minutes }}:{{ seconds < 10 ? '0' + seconds : seconds }}
     </div>
 
@@ -18,8 +43,10 @@
 
     <!-- Start/Reset Buttons -->
     <div class="flex space-x-4 mb-2">
-      <button class="bg-[#5568FE] text-white px-6 py-2 rounded-lg hover:bg-indigo-800" (click)="startTimer()">Start</button>
-      <button class="border border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50" (click)="resetTimer()">Reset</button>
+      <button class="bg-[#5568FE] text-white px-6 py-2 rounded-lg hover:bg-indigo-800"
+              (click)="startTimer()">Start</button>
+      <button class="border border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50"
+              (click)="resetTimer()">Reset</button>
     </div>
 
     <!-- Session Indicator -->
@@ -28,34 +55,40 @@
   </div>
 
   <!-- Settings Modal -->
-  <div *ngIf="showSettingsModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+  <div *ngIf="showSettingsModal"
+       class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
     <div class="bg-white rounded-xl p-6 w-80 shadow-lg relative">
       <h3 class="text-center font-bold text-lg mb-4">Customize Timer</h3>
 
       <div class="space-y-4">
         <div class="flex justify-between items-center">
           <label class="text-gray-700 font-medium">Focus Time</label>
-          <input type="number" [(ngModel)]="focusTime" min="1" class="w-20 text-center bg-gray-200 rounded px-2 py-1">
+          <input type="number" [(ngModel)]="focusTime" min="1"
+                 class="w-20 text-center bg-gray-200 rounded px-2 py-1">
         </div>
 
         <div class="flex justify-between items-center">
           <label class="text-gray-700 font-medium">Short Break</label>
-          <input type="number" [(ngModel)]="shortBreakTime" min="0" class="w-20 text-center bg-gray-200 rounded px-2 py-1">
+          <input type="number" [(ngModel)]="shortBreakTime" min="0"
+                 class="w-20 text-center bg-gray-200 rounded px-2 py-1">
         </div>
 
         <div class="flex justify-between items-center">
           <label class="text-gray-700 font-medium">Long Break</label>
-          <input type="number" [(ngModel)]="longBreakTime" min="0" class="w-20 text-center bg-gray-200 rounded px-2 py-1">
+          <input type="number" [(ngModel)]="longBreakTime" min="0"
+                 class="w-20 text-center bg-gray-200 rounded px-2 py-1">
         </div>
 
         <div class="flex justify-between items-center">
           <label class="text-gray-700 font-medium">Sessions</label>
-          <input type="number" [(ngModel)]="totalSessions" min="1" class="w-20 text-center bg-gray-200 rounded px-2 py-1">
+          <input type="number" [(ngModel)]="totalSessions" min="1"
+                 class="w-20 text-center bg-gray-200 rounded px-2 py-1">
         </div>
       </div>
 
       <div class="text-center mt-6">
-        <button (click)="saveSettings()" class="bg-indigo-500 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition">Save</button>
+        <button (click)="saveSettings()"
+                class="bg-indigo-500 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition">Save</button>
       </div>
     </div>
   </div>

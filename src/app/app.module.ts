@@ -10,6 +10,7 @@ import { PomodoroTimerComponent } from './pomodoro/pomodoro-timer/pomodoro-timer
 import { HttpClientModule } from '@angular/common/http';
 import { StopwatchComponent } from './stopwatch/stopwatch.component';
 import { DailyPlannerComponent } from './daily-planner/daily-planner.component';
+import { NotesComponent } from './notes/notes.component';
 
 
 const routes: Routes = [
@@ -23,6 +24,7 @@ const routes: Routes = [
     AppComponent,
     HomepageComponent,
     LoginComponent,
+    NotesComponent,
     PomodoroTimerComponent,
      StopwatchComponent,
     DailyPlannerComponent

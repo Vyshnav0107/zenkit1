@@ -1,32 +1,75 @@
 <!-- ✅ Top Navigation Bar -->
-<header class="bg-grey-500 px-4 py-3 shadow-md flex justify-between items-center">
+<header class="bg-gray-100 px-4 py-3 shadow-md flex justify-between items-center">
   <div class="flex items-center space-x-2">
     <img src="assets/my-image.png" alt="Zenkit Logo" class="w-12 h-12">
     <span class="font-bold text-3xl">Zenkit</span>
   </div>
 
-  <div class="relative" (click)="toggleDropdown()" tabindex="0" (blur)="closeDropdown()">
-    <img src="https://img.icons8.com/color/48/user.png"
-         alt="User Avatar"
-         class="w-12 h-12 rounded-full border-4 border-white shadow-md ring-2 ring-blue-500 hover:ring-blue-700 transition duration-300 ease-in-out cursor-pointer" />
+ <div class="relative" (click)="toggleDropdown()" tabindex="0" (blur)="closeDropdown()">
+  <!-- 👤 User Avatar -->
+  <img src="https://img.icons8.com/color/48/user.png" alt="User Avatar"
+    class="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-4 border-white shadow-md ring-2 ring-blue-500 hover:ring-blue-700 transition duration-300 ease-in-out cursor-pointer" />
 
-    <!-- Dropdown -->
-    <div *ngIf="dropdownOpen"
-         class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-50 py-2 text-sm text-gray-700">
-      <div class="px-4 py-2 border-b font-medium">Hi, Diya</div>
-      <button (click)="signOut()"
-              class="block w-full bg-blue-400 text-left px-4 py-2 hover:bg-blue-600 transition">
-        Sign Out
-      </button>
+  <!-- 📂 Dropdown Menu -->
+  <div *ngIf="dropdownOpen"
+       class="absolute right-0 mt-2 w-44 sm:w-48 bg-white border rounded-lg shadow-lg z-50 py-2 text-sm text-gray-700">
+       
+    <div class="px-4 py-2 border-b font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+      Hi, {{ userFullName }}
     </div>
+
+    <button (click)="toggleChangePasswordForm()"
+            class="block w-full text-left px-4 py-2 hover:bg-gray-100">
+      Change Password
+    </button>
+
+    <button (click)="signOut()"
+            class="block w-full text-left px-4 py-2 text-white bg-blue-400 hover:bg-blue-600 transition">
+      Sign Out
+    </button>
   </div>
+
+<!-- 🔐 Change Password Form -->
+<!-- 🔐 Change Password Modal -->
+<div *ngIf="showChangePasswordForm"
+     class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+  <div class="bg-white w-full max-w-3xl rounded-xl shadow-2xl p-10 relative flex flex-col items-center">
+
+    <!-- ❌ Close Button -->
+    <button (click)="toggleChangePasswordForm()"
+            class="absolute top-4 right-4 text-gray-700 hover:text-red-600 text-2xl font-bold">&times;</button>
+
+    <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">Change Password</h3>
+
+    <form [formGroup]="changePasswordForm" (ngSubmit)="onChangePassword()" class="w-full max-w-md space-y-4">
+      <input type="password" formControlName="currentPassword" placeholder="Current Password"
+             class="w-full border border-gray-300 px-4 py-3 rounded-lg text-base" />
+      <input type="password" formControlName="newPassword" placeholder="New Password"
+             class="w-full border border-gray-300 px-4 py-3 rounded-lg text-base" />
+
+      <!-- 🔴 Error / ✅ Success -->
+      <div *ngIf="passwordError" class="text-red-600 text-sm font-medium">{{ passwordError }}</div>
+      <div *ngIf="passwordSuccess" class="text-green-600 text-sm font-medium">{{ passwordSuccess }}</div>
+
+      <button type="submit"
+              class="w-full bg-blue-600 text-white text-base font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+        Update Password
+      </button>
+    </form>
+  </div>
+</div>
+
+
+
+    </div>
+
 </header>
 
 <!-- ✅ Homepage Content -->
 <div *ngIf="activeTool === null">
   <!-- Greeting -->
   <section class="bg-blue-100 mx-4 mt-4 p-4 rounded-xl text-center">
-    <h2 class="text-lg font-bold text-gray-800">Hi Diya,</h2>
+   <div class="px-4 py-2 border-b font-medium">Hi, {{ userFullName }}</div>
     <p class="text-md text-gray-700">Let's plan your day with calm and focus</p>
     <img src="assets/welcome.png" alt="Planner Image" class="mx-auto mt-2 w-20 h-20">
   </section>
@@ -36,8 +79,7 @@
 
     <!-- ✅ Daily Planner -->
     <div class="relative group">
-      <button
-        (click)="toggleTool('dailyPlanner')"
+      <button (click)="toggleTool('dailyPlanner')"
         class="w-full text-left bg-white rounded-lg shadow p-4 flex items-start space-x-3 transition-transform duration-300 transform group-hover:scale-105">
         <img src="assets/check.svg" class="w-6 h-6 mt-1" alt="Check Icon">
         <div>
@@ -49,8 +91,7 @@
 
     <!-- ✅ Pomodoro -->
     <div class="relative group">
-      <button
-        (click)="toggleTool('pomodoro')"
+      <button (click)="toggleTool('pomodoro')"
         class="w-full text-left bg-white rounded-lg shadow p-4 flex items-start space-x-3 transition-transform duration-300 transform group-hover:scale-105">
         <img src="assets/focus.svg" class="w-6 h-6 mt-1" alt="Focus Icon">
         <div>
@@ -62,19 +103,21 @@
 
     <!-- ✅ Jot -->
     <div class="relative group">
-      <button class="w-full text-left bg-white rounded-lg shadow p-4 flex items-start space-x-3 transition-transform duration-300 transform group-hover:scale-105">
-        <img src="assets/jot.svg" class="w-6 h-6 mt-1" alt="Jot Icon">
-        <div>
-          <h3 class="font-semibold text-gray-800">Capture Every Thought</h3>
-          <p class="text-sm text-gray-600">Jot down notes, reminders, and inspiration instantly.</p>
-        </div>
-      </button>
+  <button
+    (click)="toggleTool('notes')"
+    class="w-full text-left bg-white rounded-lg shadow p-4 flex items-start space-x-3 transition-transform duration-300 transform group-hover:scale-105">
+    <img src="assets/jot.svg" class="w-6 h-6 mt-1" alt="Jot Icon">
+    <div>
+      <h3 class="font-semibold text-gray-800">Capture Every Thought</h3>
+      <p class="text-sm text-gray-600">Jot down notes, reminders, and inspiration instantly.</p>
     </div>
+  </button>
+</div>
+
 
     <!-- ✅ Stopwatch -->
     <div class="relative group">
-      <button
-        (click)="toggleTool('stopwatch')"
+      <button (click)="toggleTool('stopwatch')"
         class="w-full text-left bg-white rounded-lg shadow p-4 flex items-start space-x-3 transition-transform duration-300 transform group-hover:scale-105">
         <img src="assets/stopwatch.svg" class="w-6 h-6 mt-1" alt="Stopwatch Icon" />
         <div>
@@ -98,44 +141,39 @@
 <div *ngIf="activeTool === 'pomodoro'">
   <app-pomodoro-timer></app-pomodoro-timer>
 </div>
-
+<div *ngIf="activeTool === 'notes'">
+  <app-notes></app-notes>
+</div>
 
 
 <!-- ✅ Bottom Navigation -->
-<nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center h-16 shadow-md z-10">
-  <button
-  (click)="toggleTool('dailyPlanner')"
-  class="flex flex-col items-center p-2 rounded-full transition"
-  [ngClass]="{ 'bg-blue-100': activeTool === 'dailyPlanner' }"
->
-  <img src="assets/check.svg" class="w-6 h-6" alt="Daily Planner" />
-</button>
+<nav class="fixed bottom-0 left-0 right-0 bg-gray-100 border-t flex justify-around items-center h-16 shadow-md z-10">
+  <button (click)="toggleTool('dailyPlanner')" class="flex flex-col items-center p-2 rounded-full transition"
+    [ngClass]="{ 'bg-blue-100': activeTool === 'dailyPlanner' }">
+    <img src="assets/check.svg" class="w-6 h-6" alt="Daily Planner" />
+  </button>
 
-  <button
-  (click)="togglePomodoro()"
-  class="flex flex-col items-center p-2 rounded-full transition"
-  [ngClass]="{ 'bg-blue-100': activeTool === 'pomodoro' }"
->
-  <img src="assets/focus.svg" class="w-6 h-6" alt="Pomodoro" />
-</button>
+  <button (click)="togglePomodoro()" class="flex flex-col items-center p-2 rounded-full transition"
+    [ngClass]="{ 'bg-blue-100': activeTool === 'pomodoro' }">
+    <img src="assets/focus.svg" class="w-6 h-6" alt="Pomodoro" />
+  </button>
   <!-- Floating Home -->
   <div class="relative -top-6 z-20">
-    <button
-      (click)="home()"
+    <button (click)="home()"
       class="bg-blue-300 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-blue-700 transition duration-300">
       <img src="assets/home.svg" class="w-7 h-7" alt="Home" />
     </button>
   </div>
 
-  <button class="flex flex-col items-center p-2 rounded-full hover:bg-blue-100 transition">
-    <img src="assets/jot.svg" class="w-6 h-6" alt="Jot">
-  </button>
-
   <button
-  (click)="toggleTool('stopwatch')"
+  (click)="toggleTool('notes')"
   class="flex flex-col items-center p-2 rounded-full transition"
-  [ngClass]="{ 'bg-blue-100': activeTool === 'stopwatch' }"
+  [ngClass]="{ 'bg-blue-100': activeTool === 'notes' }"
 >
-  <img src="assets/stopwatch.svg" class="w-6 h-6" alt="Stopwatch" />
+  <img src="assets/jot.svg" class="w-6 h-6" alt="Jot" />
 </button>
+  <button (click)="toggleTool('stopwatch')" class="flex flex-col items-center p-2 rounded-full transition"
+    [ngClass]="{ 'bg-blue-100': activeTool === 'stopwatch' }">
+    <img src="assets/stopwatch.svg" class="w-6 h-6" alt="Stopwatch" />
+  </button>
 </nav>

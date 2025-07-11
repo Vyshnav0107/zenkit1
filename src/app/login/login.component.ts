@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-login',
@@ -9,6 +10,11 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
+  onBackFromVerification(): void {
+    this.showVerification = false;
+    this.isLoginMode = true;  // or false if returning to signup
+    this.showUpdatePassword = false;
+  }
   showForm = false;
   isLoginMode = false;
   showVerification = false;
@@ -28,7 +34,8 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private location: Location
   ) {
     // SignUp Form
     this.signupForm = this.fb.group(
@@ -82,66 +89,62 @@ export class LoginComponent {
         next: (res) => {
           console.log('Signup success:', res);
          
-
-          // ✅ Show login form
-          this.isLoginMode = true;
-          this.showVerification = false;
-          this.showUpdatePassword = false;
-
-          // Optionally reset signup form
-          this.signupForm.reset();
-        },
-       error: (err) => {
-  console.error('Signup error:', err);
-  alert(`Signup failed: ${err.status} - ${err.message}`);
-}
-      });
+  this.showToastMessage('Signup successful! Please login.', 'success');
+        this.isLoginMode = true;
+        this.showVerification = false;
+        this.showUpdatePassword = false;
+        this.signupForm.reset();
+      },
+      error: (err) => {
+        console.error('Signup error:', err);
+        this.showToastMessage('Signup failed: Email already exists.', 'error');
+      },
+    });
     }
   }
 
   // 🔐 LOGIN
   onSubmitLogin(): void {
-    if (this.loginForm.valid) {
-      console.log('Login form submitted with:', this.loginForm.value);
-
-      this.authService.login(this.loginForm.value).subscribe({
-        next: (res) => {
-          console.log('Login success:', res);
-           this.showToastMessage('Login successful!');
+  if (this.loginForm.valid) {
+    this.authService.login(this.loginForm.value).subscribe({
+      next: (res) => {
+        console.log('Login success:', res);
+        this.showToastMessage('Login successful!', 'success');
         setTimeout(() => {
           this.router.navigate(['/homepage']);
-        }, 1000); // Delay redirect to let toast show
-      },
-        error: (err) => {
-          console.error('Login failed:', err);
-          alert('Invalid credentials. Please try again.');
-        },
-      });
-    }
-    
-  }
-
-  // 🔁 FORGOT PASSWORD
-  onForgotPassword(): void {
-    const email = this.loginForm.get('email')?.value;
-    if (!email) {
-      alert('Please enter your email before requesting a reset.');
-      return;
-    }
-
-    this.authService.forgotPassword(email).subscribe({
-      next: () => {
-        alert('Reset code sent to your email.');
-        this.showVerification = true;
-        this.isLoginMode = false;
-        this.showUpdatePassword = false;
+        }, 2000);
       },
       error: (err) => {
-        console.error('Forgot password error:', err);
-        alert('Email not found.');
-      },
+        console.error('Login failed:', err);
+        this.showToastMessage('Invalid credentials. Please try again.', 'error');
+      }
     });
   }
+ 
+}
+
+
+  // 🔁 FORGOT PASSWORD
+ onForgotPassword(): void {
+  const email = this.loginForm.get('email')?.value;
+  if (!email) {
+    this.showToastMessage('Please enter your email before requesting a reset.', 'error');
+    return;
+  }
+
+  this.authService.forgotPassword(email).subscribe({
+    next: () => {
+      this.showToastMessage('Reset code sent to your email.', 'success');
+      this.showVerification = true;
+      this.isLoginMode = false;
+      this.showUpdatePassword = false;
+    },
+    error: (err) => {
+      console.error('Forgot password error:', err);
+      this.showToastMessage('Email not found.', 'error');
+    },
+  });
+}
 
   // ✅ VERIFY CODE
   onVerifyCode(): void {
@@ -152,22 +155,24 @@ export class LoginComponent {
 
   // 🔁 RESET PASSWORD
   onUpdatePassword(): void {
-    if (this.updatePasswordForm.valid) {
-      const token = 'dummyToken'; // Replace with actual token logic
-      const newPassword = this.updatePasswordForm.get('newPassword')?.value;
+  if (this.updatePasswordForm.valid) {
+    const token = 'dummyToken'; // Replace with actual token logic
+    const newPassword = this.updatePasswordForm.get('newPassword')?.value;
 
-      this.authService.resetPassword(token, newPassword).subscribe({
-        next: () => {
-          alert('Password updated successfully.');
+    this.authService.resetPassword(token, newPassword).subscribe({
+      next: () => {
+        this.showToastMessage('Password updated successfully.', 'success');
+        setTimeout(() => {
           this.router.navigate(['/homepage']);
-        },
-        error: (err) => {
-          console.error('Reset password failed:', err);
-          alert('Failed to reset password.');
-        },
-      });
-    }
+        }, 2000);
+      },
+      error: (err) => {
+        console.error('Reset password failed:', err);
+        this.showToastMessage('Failed to reset password.', 'error');
+      },
+    });
   }
+}
 
   // ✅ Password match validators
   passwordMatchValidator(form: FormGroup) {
@@ -210,14 +215,17 @@ export class LoginComponent {
   toggleShowConfirmNewPassword() {
     this.showConfirmNewPassword = !this.showConfirmNewPassword;
   }
-  toastMessage = '';
+toastMessage = '';
+toastColor = 'bg-green-600'; // default to success
 showToast = false;
-
-showToastMessage(message: string) {
+showToastMessage(message: string, type: 'success' | 'error') {
   this.toastMessage = message;
+  this.toastColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
   this.showToast = true;
   setTimeout(() => {
     this.showToast = false;
-  }, 2000); // Toast visible for 2 seconds
+  }, 2000);
 }
+
+loginError: string = '';
 }

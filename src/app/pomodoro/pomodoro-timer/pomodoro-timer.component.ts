@@ -17,10 +17,9 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
   phase = 'Focus Time';
   isRunning = false;
   timer: any = null;
-  showSettingsModal = false;
 
-  // Click sound (used only for timer buttons)
-  clickSound = new Audio('assets/click.wav');
+  showSettingsModal = false;
+  showCompletionScreen = false;
 
   constructor(private pomodoroService: PomodoroService) {}
 
@@ -30,11 +29,6 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.clearTimer();
-  }
-
-  private playClickSound() {
-    this.clickSound.currentTime = 0;
-    this.clickSound.play();
   }
 
   loadSettings() {
@@ -48,7 +42,6 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
 
   startTimer() {
     if (this.isRunning || this.timer) return;
-    this.playClickSound(); // ✅ Sound only here
 
     this.isRunning = true;
     this.timer = setInterval(() => {
@@ -75,10 +68,10 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
   }
 
   resetTimer() {
-    this.playClickSound(); // ✅ Sound here
     this.clearTimer();
     this.session = 1;
     this.phase = 'Focus Time';
+    this.showCompletionScreen = false;
     this.setTimerMinutes(this.focusTime);
   }
 
@@ -92,25 +85,29 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
       if (this.session < this.totalSessions) {
         this.phase = 'Short Break';
         this.setTimerMinutes(this.shortBreakTime);
+        this.session++; // Increment only here
+        this.startTimer();
       } else {
         this.phase = 'Long Break';
         this.setTimerMinutes(this.longBreakTime);
+        this.startTimer();
       }
-      this.session++;
-    } else {
+    } else if (this.phase === 'Short Break') {
       this.phase = 'Focus Time';
       this.setTimerMinutes(this.focusTime);
+      this.startTimer();
+    } else if (this.phase === 'Long Break') {
+      this.phase = 'Done 🎉';
+      this.clearTimer();
+      this.showCompletionScreen = true;
     }
-
-    this.startTimer();
   }
 
   openSettings() {
-    this.showSettingsModal = true; // ❌ No sound here
+    this.showSettingsModal = true;
   }
 
   saveSettings() {
-    this.playClickSound(); // ✅ Sound here
     this.showSettingsModal = false;
     this.resetTimer();
     this.pomodoroService.updateSettings({

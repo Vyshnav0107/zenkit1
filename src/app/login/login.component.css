@@ -1,3 +1,4 @@
+/* login.component.css */
 /* 🌀 Logo animation (grow + move) */
 @keyframes logoEntry {
   0% {
@@ -5,7 +6,7 @@
     opacity: 0;
   }
   100% {
-    transform: scale(1) translateY(-30px);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 }
@@ -21,7 +22,7 @@
 }
 
 .zenkit-text {
-  animation: fadeIn 1s ease-out 1s forwards;
+  animation: fadeIn 1s ease-out 0.5s forwards;
 }
 
 /* 🧩 Taglines and Button fade TOGETHER */
@@ -31,7 +32,7 @@
 }
 
 .fade-group {
-  animation: delayedFade 1s ease-out 2s forwards;
+  animation: delayedFade 1s ease-out 1s forwards;
 }
 
 /* Used for verification + password transitions */
