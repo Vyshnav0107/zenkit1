@@ -42,7 +42,6 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
 
   startTimer() {
     if (this.isRunning || this.timer) return;
-    this.startAudio.play();
 
     this.isRunning = true;
     this.timer = setInterval(() => {
@@ -100,7 +99,6 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
     } else if (this.phase === 'Long Break') {
       this.phase = 'Done 🎉';
       this.clearTimer();
-      this.endAudio.play();
       this.showCompletionScreen = true;
     }
   }
@@ -119,7 +117,4 @@ export class PomodoroTimerComponent implements OnInit, OnDestroy {
       sessions: this.totalSessions
     });
   }
-  startAudio = new Audio('assets/click.wav');
-endAudio = new Audio('assets/click.wav');
-
 }

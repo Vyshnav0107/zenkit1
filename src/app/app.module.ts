@@ -9,7 +9,7 @@ import { LoginComponent } from './login/login.component';
 import { PomodoroTimerComponent } from './pomodoro/pomodoro-timer/pomodoro-timer.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { StopwatchComponent } from './stopwatch/stopwatch.component';
-import { DailyPlannerComponent } from './daily-planner/daily-planner.component';
+import { DailyPlannerComponent } from './daily-planner/daily-planner.component'; // ✅ Corrected import
 import { NotesComponent } from './notes/notes.component';
 import { AuthInterceptor } from './auth.interceptor'; // 👈 Import interceptor
 
@@ -27,7 +27,7 @@ const routes: Routes = [
     NotesComponent,
     PomodoroTimerComponent,
     StopwatchComponent,
-    DailyPlannerComponent
+    DailyPlannerComponent // ✅ Added to declarations
   ],
   imports: [
     BrowserModule,
