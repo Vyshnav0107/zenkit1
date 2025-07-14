@@ -123,12 +123,10 @@ changePassword(currentPassword: string, newPassword: string): Observable<any> {
   deleteMultipleNotes(noteIds: string[]): Observable<any> {
     return this.http.post(`${this.notesUrl}/delete-many`, { ids: noteIds });
   }
- verifyCode(email: string, code: string): Observable<{ success: boolean }> {
-  return this.http.post<{ success: boolean }>('http://localhost:8888/api/auth/verify-code', {
-    email,
-    code
-  });
+verifyCode(email: string, code: string) {
+  return this.http.post<{ valid: boolean }>('http://localhost:8888/api/auth/verify-code', { email, code });
 }
+
 getRemindersByDate(date: string): Observable<Task[]> {
   return this.http.get<any[]>(`http://localhost:8888/api/reminders?date=${date}`)
     .pipe(
