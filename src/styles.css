@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer utilities {
+  .translate-x-0 {
+    transform: translateX(0);
+  }
+
+  .translate-x-\[300px\] {
+    transform: translateX(300px);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.7s ease-in-out forwards;
+  }
+}
