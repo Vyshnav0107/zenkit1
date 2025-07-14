@@ -109,9 +109,18 @@ export class NotesComponent implements OnInit {
     this.searchTerm = '';
   }
 
-  onSearchChange() {
-    // Real-time filtering handled by getter
+ onSearchChange() {
+  const term = this.searchTerm.toLowerCase().trim();
+  if (!term) {
+    this.searchResults = [];
+    return;
   }
+
+  this.searchResults = this.notes.filter(note =>
+    note.title.toLowerCase().includes(term)
+  );
+}
+
 
   addNote() {
     this.isCreatingNote = true;
@@ -232,4 +241,13 @@ export class NotesComponent implements OnInit {
   home() {
     this.activeTool = null;
   }
+  searchResults: Note[] = [];
+editNoteById(id: string | undefined) {
+  if (!id) return;
+  const index = this.notes.findIndex(note => note._id === id);
+  if (index !== -1) {
+    this.editNote(index);
+    this.closeSearch();
+  }
+}
 }

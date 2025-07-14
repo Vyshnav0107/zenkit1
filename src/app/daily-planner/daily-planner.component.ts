@@ -27,27 +27,56 @@ export class DailyPlannerComponent implements OnInit {
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.loadTasksForDate(this.selectedDate);
-  }
+  this.loadTasksForDate(this.selectedDate);
+}
 
   onDateChange(): void {
     this.loadTasksForDate(this.selectedDate);
   }
 
-  private loadTasksForDate(dateStr: string): void {
-    const today = new Date().toISOString().substring(0, 10);
-    const prevDate = this.getPreviousDate(dateStr);
+ private loadTasksForDate(dateStr: string): void {
+  const today = new Date().toISOString().substring(0, 10);
+  const prevDate = this.getPreviousDate(dateStr);
 
-    this.currentTasks = this.tasksByDate[dateStr] ? [...this.tasksByDate[dateStr]] : [];
-    this.previousDayCompletedTasks = this.tasksByDate[prevDate]
-      ? this.tasksByDate[prevDate].filter(task => task.completed)
-      : [];
+  this.authService.getRemindersByDate(dateStr).subscribe({
+    next: (tasks) => {
+      // Map _id to id (if needed)
+      const processedTasks = tasks.map(task => ({
+        ...task,
+        id: task._id ?? task.id  // in case backend sends _id
+      }));
 
-    if (dateStr < today) {
-      this.currentTasks = this.currentTasks.map(task => ({ ...task, completed: true }));
-      this.tasksByDate[dateStr] = [...this.currentTasks];
+      this.tasksByDate[dateStr] = processedTasks;
+      this.currentTasks = [...processedTasks];
+
+      // Load previous day's completed tasks
+      this.authService.getRemindersByDate(prevDate).subscribe({
+        next: (prevTasks) => {
+          this.previousDayCompletedTasks = prevTasks
+            .filter(task => task.completed)
+            .map(task => ({
+              ...task,
+              id: task._id ?? task.id
+            }));
+        },
+        error: (err) => {
+          console.error('Error loading previous day tasks:', err);
+          this.previousDayCompletedTasks = [];
+        }
+      });
+
+      // ✅ If past date, mark all tasks as completed
+      if (dateStr < today) {
+        this.currentTasks = this.currentTasks.map(task => ({ ...task, completed: true }));
+        this.tasksByDate[dateStr] = [...this.currentTasks];
+      }
+    },
+    error: (err) => {
+      console.error('Error fetching tasks for date:', err);
+      this.currentTasks = [];
     }
-  }
+  });
+}
 
   getPreviousDate(dateStr: string): string {
     const date = new Date(dateStr);
@@ -85,7 +114,7 @@ export class DailyPlannerComponent implements OnInit {
     this.closeAddModal();
   }
 
- addTaskToBackend(title: string, date: string, time: string = ''): void {
+addTaskToBackend(title: string, date: string, time: string = ''): void {
   const newTask = {
     title: title,
     date: date,
@@ -95,7 +124,12 @@ export class DailyPlannerComponent implements OnInit {
 
   this.authService.addReminder(newTask).subscribe({
     next: (response) => {
-      console.log('Reminder added successfully:', response);
+      console.log('Reminder added:', response);
+
+      // ✅ Map _id from backend to id so frontend can use it
+      if (response._id && !response.id) {
+        response.id = response._id;
+      }
 
       if (!this.tasksByDate[date]) {
         this.tasksByDate[date] = [];
@@ -110,28 +144,73 @@ export class DailyPlannerComponent implements OnInit {
   });
 }
 
-  updateTask(): void {
-    if (!this.editTaskTitle.trim() || !this.editTaskTime) return;
+updateTask(): void {
+  if (!this.editTaskTitle.trim() || !this.editTaskTime) return;
 
-    const updatedTask: Task = {
-      title: this.editTaskTitle.trim(),
-      time: this.editTaskTime,
-      completed: this.currentTasks[this.editTaskIndex].completed
-    };
+  const taskToEdit = this.tasksByDate[this.selectedDate][this.editTaskIndex];
 
-    this.tasksByDate[this.selectedDate][this.editTaskIndex] = updatedTask;
-    this.closeEditModal();
-    this.loadTasksForDate(this.selectedDate);
+  console.log('Editing Task:', taskToEdit); // ✅ Debug output
+
+  const updatedTask: Task = {
+    ...taskToEdit,
+    title: this.editTaskTitle.trim(),
+    time: this.editTaskTime,
+    completed: taskToEdit.completed
+  };
+
+  if (taskToEdit.id) {
+    this.authService.updateReminder(taskToEdit.id, updatedTask).subscribe({
+      next: () => {
+        this.tasksByDate[this.selectedDate][this.editTaskIndex] = updatedTask;
+        this.closeEditModal();
+        this.loadTasksForDate(this.selectedDate);
+      },
+      error: (err) => console.error('Failed to update task:', err)
+    });
+  } else {
+    console.warn('No ID found for task — cannot update backend.');
   }
+}
 
-  removeTask(index: number): void {
+
+ removeTask(index: number): void {
+  const task = this.tasksByDate[this.selectedDate][index];
+
+  if (task.id) {
+    // ✅ Delete from backend first
+    this.authService.deleteReminder(task.id).subscribe({
+      next: () => {
+        console.log('Deleted from backend:', task.id);
+        this.tasksByDate[this.selectedDate].splice(index, 1);
+        this.loadTasksForDate(this.selectedDate);
+      },
+      error: (err) => {
+        console.error('Error deleting task from backend:', err);
+      }
+    });
+  } else {
+    console.warn('Task has no ID — deleting only from frontend');
     this.tasksByDate[this.selectedDate].splice(index, 1);
     this.loadTasksForDate(this.selectedDate);
   }
+}
 
-  onCheckboxChange(): void {
-    this.tasksByDate[this.selectedDate] = [...this.currentTasks];
+
+ onCheckboxChange(): void {
+  for (const task of this.currentTasks) {
+    if (task.id) {
+      this.authService.updateReminder(task.id, {
+        completed: task.completed
+      }).subscribe({
+        next: () => console.log(`Updated completed status for task: ${task.id}`),
+        error: (err) => console.error(`Failed to update task: ${task.id}`, err)
+      });
+    }
   }
+
+  this.tasksByDate[this.selectedDate] = [...this.currentTasks];
+}
+
 
   hasCompletedTasks(): boolean {
     return this.currentTasks.some(task => task.completed);
@@ -156,10 +235,16 @@ export class DailyPlannerComponent implements OnInit {
     alert('Signed out!');
     // TODO: Replace with real sign-out logic
   }
-}
 
-interface Task {
+
+}
+export interface Task {
+  id?: string;
+  _id?: string;
   time: string;
   title: string;
   completed: boolean;
+  date?: string;
 }
+
+

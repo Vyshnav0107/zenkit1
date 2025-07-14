@@ -13,8 +13,8 @@
   </div>
 </header>
 
-<!-- ✅ Search Overlay -->
-<div *ngIf="showSearch" class="fixed inset-0 bg-white z-50 p-4">
+<!-- ✅ Search Overlay with Results -->
+<div *ngIf="showSearch" class="fixed inset-0 bg-white z-50 p-4 overflow-auto">
   <div class="flex items-center gap-2 mb-4">
     <input
       type="text"
@@ -27,6 +27,26 @@
       Cancel
     </button>
   </div>
+
+  <!-- ✅ Search Results -->
+  <div *ngIf="searchTerm && searchResults.length > 0; else noMatches">
+    <div
+      *ngFor="let note of searchResults"
+      (click)="editNoteById(note._id)"
+      class="bg-white rounded-xl shadow-md p-4 mb-3 cursor-pointer"
+    >
+      <div class="font-bold text-gray-900 text-sm sm:text-base">{{ note.title }}</div>
+      <div class="text-gray-700 text-sm mt-1">{{ note.body }}</div>
+      <div class="text-xs text-gray-500 text-right mt-2">{{ note.date }}</div>
+    </div>
+  </div>
+
+  <!-- ✅ No Matches Template -->
+  <ng-template #noMatches>
+    <div *ngIf="searchTerm" class="text-center text-gray-500 mt-10">
+      No matching notes found.
+    </div>
+  </ng-template>
 </div>
 
 <!-- ✅ Add/Edit Note Full Page -->
@@ -42,14 +62,12 @@
     </button>
   </header>
 
-  <!-- ✅ Title Input -->
   <input
     [(ngModel)]="newNoteTitle"
     placeholder="Title"
     class="text-base sm:text-lg font-bold text-gray-900 border-none outline-none mb-2"
   />
 
-  <!-- ✅ Body Textarea -->
   <textarea
     [(ngModel)]="newNoteBody"
     placeholder="Write your note here..."
@@ -58,10 +76,11 @@
   ></textarea>
 </div>
 
-<!-- ✅ No Notes Found -->
-<div *ngIf="filteredNotes.length === 0 && !isCreatingNote" class="text-center text-gray-500 py-10">
+<!-- ✅ No Notes Message Only If Notes Are Truly Empty -->
+<div *ngIf="notes.length === 0 && !isCreatingNote && !showSearch" class="text-center text-gray-500 py-10">
   No notes found.
 </div>
+
 
 <!-- ✅ Notes Grid -->
 <main

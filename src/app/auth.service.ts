@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 interface Note{
   _id?:string;
@@ -9,11 +10,13 @@ interface Note{
   date:string
 }
 interface Task {
-  id?: string;  // make optional in case it's not present in local-only mode
+  id?: string;
+  _id?:string;
   time: string;
   title: string;
   completed: boolean;
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -125,6 +128,15 @@ changePassword(currentPassword: string, newPassword: string): Observable<any> {
     email,
     code
   });
+}
+getRemindersByDate(date: string): Observable<Task[]> {
+  return this.http.get<any[]>(`http://localhost:8888/api/reminders?date=${date}`)
+    .pipe(
+      map(tasks => tasks.map(task => ({
+        ...task,
+        id: task._id ?? task.id
+      })))
+    );
 }
 
 
