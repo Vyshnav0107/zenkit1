@@ -7,11 +7,11 @@ import { AppComponent } from './app.component';
 import { HomepageComponent } from './homepage/homepage.component';
 import { LoginComponent } from './login/login.component';
 import { PomodoroTimerComponent } from './pomodoro/pomodoro-timer/pomodoro-timer.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { StopwatchComponent } from './stopwatch/stopwatch.component';
 import { DailyPlannerComponent } from './daily-planner/daily-planner.component';
 import { NotesComponent } from './notes/notes.component';
-
+import { AuthInterceptor } from './auth.interceptor'; // 👈 Import interceptor
 
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -26,7 +26,7 @@ const routes: Routes = [
     LoginComponent,
     NotesComponent,
     PomodoroTimerComponent,
-     StopwatchComponent,
+    StopwatchComponent,
     DailyPlannerComponent
   ],
   imports: [
@@ -35,10 +35,15 @@ const routes: Routes = [
     ReactiveFormsModule,
     FormsModule,
     RouterModule.forRoot(routes),
-        HttpClientModule 
-
+    HttpClientModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
