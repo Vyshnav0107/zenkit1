@@ -8,6 +8,13 @@ interface Note{
   body:string;
   date:string
 }
+interface Task {
+  id?: string;  // make optional in case it's not present in local-only mode
+  time: string;
+  title: string;
+  completed: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private baseUrl = 'http://localhost:8888/api/auth';
@@ -60,6 +67,16 @@ logout(): void {
 addReminder(reminder: { title: string; date: string; time: string; completed: boolean }): Observable<any> {
   return this.http.post('http://localhost:8888/api/reminders', reminder);
 }
+// Update reminder
+updateReminder(id: string, updatedData: any): Observable<any> {
+  return this.http.put(`http://localhost:8888/api/reminders/${id}`, updatedData);
+}
+
+// Delete reminder
+deleteReminder(id: string): Observable<any> {
+  return this.http.delete(`http://localhost:8888/api/reminders/${id}`);
+}
+
 saveStopwatchData(data: {
   startTime: string;
   endTime: string;
@@ -102,4 +119,8 @@ changePassword(currentPassword: string, newPassword: string): Observable<any> {
   deleteMultipleNotes(noteIds: string[]): Observable<any> {
     return this.http.post(`${this.notesUrl}/delete-many`, { ids: noteIds });
   }
+  verifyCode(code: string): Observable<any> {
+  return this.http.post('http://localhost:8888/api/verify-code', { code });
+}
+
 }

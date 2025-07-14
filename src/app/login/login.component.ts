@@ -145,13 +145,35 @@ export class LoginComponent {
     },
   });
 }
+enteredCode: string = '';
+verificationError: string = '';
 
-  // ✅ VERIFY CODE
-  onVerifyCode(): void {
-    // Simulate code verification success
-    this.showVerification = false;
-    this.showUpdatePassword = true;
+
+  onVerifyCode() {
+  if (!this.enteredCode.trim()) {
+    this.verificationError = 'Please enter the verification code.';
+    setTimeout(() => this.verificationError = '', 3000);
+    return;
   }
+
+  this.authService.verifyCode(this.enteredCode).subscribe({
+    next: (res) => {
+      if (res.success) {
+        this.verificationError = '';
+        this.showVerification = false;
+        this.showUpdatePassword = true;
+      } else {
+        this.verificationError = 'Invalid code. Please try again.';
+        setTimeout(() => this.verificationError = '', 3000);
+      }
+    },
+    error: (err) => {
+      this.verificationError = err.error?.message || 'Verification failed.';
+      setTimeout(() => this.verificationError = '', 3000);
+    }
+  });
+}
+
 
   // 🔁 RESET PASSWORD
   onUpdatePassword(): void {
@@ -229,3 +251,4 @@ showToastMessage(message: string, type: 'success' | 'error') {
 
 loginError: string = '';
 }
+
