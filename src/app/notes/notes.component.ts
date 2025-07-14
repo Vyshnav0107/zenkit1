@@ -38,7 +38,10 @@ export class NotesComponent implements OnInit {
 
   loadNotes() {
     this.authService.getNotes().subscribe({
-      next: (data: Note[]) => (this.notes = data),
+      next: (data: Note[]) => {
+        // Initialize selected to false for all notes
+        this.notes = data.map(note => ({ ...note, selected: false }));
+      },
       error: (err: any) => console.error('Failed to load notes:', err),
     });
   }
@@ -85,7 +88,7 @@ export class NotesComponent implements OnInit {
 
     this.authService.deleteMultipleNotes(ids).subscribe({
       next: () => {
-        this.notes = this.notes.filter(n => !n.selected);
+        this.loadNotes();  // Reload notes after deletion
         this.isEditMode = false;
         this.isDeleteConfirmVisible = false;
       },
@@ -166,15 +169,15 @@ export class NotesComponent implements OnInit {
 
       this.authService.updateNote(noteId, noteData).subscribe({
         next: (updatedNote: Note) => {
-          this.notes[this.editingNoteIndex!] = { ...updatedNote, selected: false };
+          this.loadNotes();  // Reload notes after update
           this.cancelNewNote();
         },
         error: (err: any) => console.error('Update failed:', err),
       });
     } else {
       this.authService.addNote(noteData).subscribe({
-        next: (newNote: Note) => {
-          this.notes.unshift({ ...newNote, selected: false });
+        next: () => {
+          this.loadNotes();  // Reload notes after creation
           this.cancelNewNote();
         },
         error: (err: any) => console.error('Create failed:', err),
