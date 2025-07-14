@@ -110,57 +110,24 @@ export class DailyPlannerComponent implements OnInit {
   });
 }
 
- updateTask(): void {
-  if (!this.editTaskTitle.trim() || !this.editTaskTime) return;
+  updateTask(): void {
+    if (!this.editTaskTitle.trim() || !this.editTaskTime) return;
 
-  const task = this.currentTasks[this.editTaskIndex];
-  const updatedTask: Task = {
-    ...task,
-    title: this.editTaskTitle.trim(),
-    time: this.editTaskTime
-  };
+    const updatedTask: Task = {
+      title: this.editTaskTitle.trim(),
+      time: this.editTaskTime,
+      completed: this.currentTasks[this.editTaskIndex].completed
+    };
 
-  // Backend update
-  if (task.id) {
-    this.authService.updateReminder(task.id, updatedTask).subscribe({
-      next: (res) => {
-        this.tasksByDate[this.selectedDate][this.editTaskIndex] = res;
-        this.closeEditModal();
-        this.loadTasksForDate(this.selectedDate);
-      },
-      error: (err) => {
-        console.error('Error updating task:', err);
-      }
-    });
-  } else {
-    // Fallback for local only
     this.tasksByDate[this.selectedDate][this.editTaskIndex] = updatedTask;
     this.closeEditModal();
     this.loadTasksForDate(this.selectedDate);
   }
-}
 
-
- removeTask(index: number): void {
-  const task = this.currentTasks[index];
-
-  if (task.id) {
-    this.authService.deleteReminder(task.id).subscribe({
-      next: () => {
-        this.tasksByDate[this.selectedDate].splice(index, 1);
-        this.loadTasksForDate(this.selectedDate);
-      },
-      error: (err) => {
-        console.error('Error deleting task:', err);
-      }
-    });
-  } else {
-    // Fallback if no backend
+  removeTask(index: number): void {
     this.tasksByDate[this.selectedDate].splice(index, 1);
     this.loadTasksForDate(this.selectedDate);
   }
-}
-
 
   onCheckboxChange(): void {
     this.tasksByDate[this.selectedDate] = [...this.currentTasks];
@@ -192,9 +159,7 @@ export class DailyPlannerComponent implements OnInit {
 }
 
 interface Task {
-  id?: string; // ✅ Add this line — optional in case some tasks don’t have an ID (local-only ones)
   time: string;
   title: string;
   completed: boolean;
 }
-
