@@ -10,15 +10,14 @@ import { Location } from '@angular/common';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
-  onBackFromVerification(): void {
-    this.showVerification = false;
-    this.isLoginMode = true;  // or false if returning to signup
-    this.showUpdatePassword = false;
-  }
   showForm = false;
   isLoginMode = false;
   showVerification = false;
   showUpdatePassword = false;
+
+  enteredCode: string = '';
+  resetEmail: string = '';      // 🆕 to store email for reset
+  resetToken: string = '';      // 🆕 to store verification code
 
   signupForm: FormGroup;
   loginForm: FormGroup;
@@ -30,6 +29,11 @@ export class LoginComponent {
   showLoginPassword = false;
   showNewPassword = false;
   showConfirmNewPassword = false;
+
+  toastMessage = '';
+  toastColor = 'bg-green-600';
+  showToast = false;
+  loginError: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -64,19 +68,16 @@ export class LoginComponent {
     );
   }
 
-  // Show main form
   onGetStarted() {
     this.showForm = true;
   }
 
-  // Toggle between SignUp and Login
   toggleFormMode(mode: 'signup' | 'login') {
     this.isLoginMode = mode === 'login';
     this.showVerification = false;
     this.showUpdatePassword = false;
   }
 
-  // 🟢 SIGNUP
   onSubmit(): void {
     if (this.signupForm.valid) {
       const data = {
@@ -88,79 +89,95 @@ export class LoginComponent {
       this.authService.signup(data).subscribe({
         next: (res) => {
           console.log('Signup success:', res);
-         
-  this.showToastMessage('Signup successful! Please login.', 'success');
-        this.isLoginMode = true;
-        this.showVerification = false;
-        this.showUpdatePassword = false;
-        this.signupForm.reset();
-      },
-      error: (err) => {
-        console.error('Signup error:', err);
-        this.showToastMessage('Signup failed: Email already exists.', 'error');
-      },
-    });
+          this.showToastMessage('Signup successful! Please login.', 'success');
+          this.isLoginMode = true;
+          this.showVerification = false;
+          this.showUpdatePassword = false;
+          this.signupForm.reset();
+        },
+        error: (err) => {
+          console.error('Signup error:', err);
+          this.showToastMessage('Signup failed: Email already exists.', 'error');
+        },
+      });
     }
   }
 
-  // 🔐 LOGIN
   onSubmitLogin(): void {
-  if (this.loginForm.valid) {
-    this.authService.login(this.loginForm.value).subscribe({
-      next: (res) => {
-        console.log('Login success:', res);
-        this.showToastMessage('Login successful!', 'success');
-        setTimeout(() => {
-          this.router.navigate(['/homepage']);
-        }, 2000);
+    if (this.loginForm.valid) {
+      this.authService.login(this.loginForm.value).subscribe({
+        next: (res) => {
+          console.log('Login success:', res);
+          this.showToastMessage('Login successful!', 'success');
+          setTimeout(() => {
+            this.router.navigate(['/homepage']);
+          }, 2000);
+        },
+        error: (err) => {
+          console.error('Login failed:', err);
+          this.showToastMessage('Invalid credentials. Please try again.', 'error');
+        },
+      });
+    }
+  }
+
+  onForgotPassword(): void {
+    const email = this.loginForm.get('email')?.value;
+    if (!email) {
+      this.showToastMessage('Please enter your email before requesting a reset.', 'error');
+      return;
+    }
+
+    this.resetEmail = email; // 🆕 store email
+
+    this.authService.forgotPassword(email).subscribe({
+      next: () => {
+        this.showToastMessage('Reset code sent to your email.', 'success');
+        this.showVerification = true;
+        this.isLoginMode = false;
+        this.showUpdatePassword = false;
       },
       error: (err) => {
-        console.error('Login failed:', err);
-        this.showToastMessage('Invalid credentials. Please try again.', 'error');
+        console.error('Forgot password error:', err);
+        this.showToastMessage('Email not found.', 'error');
+      },
+    });
+  }
+
+  onVerifyCode(): void {
+    const email = this.loginForm.get('email')?.value;
+
+    if (!this.enteredCode || this.enteredCode.length !== 6) {
+      this.showToastMessage('Please enter the 6-digit code.', 'error');
+      return;
+    }
+
+    this.authService.verifyCode(email, this.enteredCode).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.showToastMessage('Code verified successfully.', 'success');
+          this.resetEmail = email;               // 🆕 store email for next step
+          this.resetToken = this.enteredCode;    // 🆕 store token for next step
+          this.showVerification = false;
+          this.showUpdatePassword = true;
+        } else {
+          this.showToastMessage('Invalid code. Please try again.', 'error');
+        }
+      },
+      error: (err) => {
+        console.error('Code verification error:', err);
+        this.showToastMessage('Verification failed. Try again.', 'error');
       }
     });
   }
- 
-}
 
-
-  // 🔁 FORGOT PASSWORD
- onForgotPassword(): void {
-  const email = this.loginForm.get('email')?.value;
-  if (!email) {
-    this.showToastMessage('Please enter your email before requesting a reset.', 'error');
-    return;
-  }
-
-  this.authService.forgotPassword(email).subscribe({
-    next: () => {
-      this.showToastMessage('Reset code sent to your email.', 'success');
-      this.showVerification = true;
-      this.isLoginMode = false;
-      this.showUpdatePassword = false;
-    },
-    error: (err) => {
-      console.error('Forgot password error:', err);
-      this.showToastMessage('Email not found.', 'error');
-    },
-  });
-}
-
-  // ✅ VERIFY CODE
-  onVerifyCode(): void {
-    // Simulate code verification success
-    this.showVerification = false;
-    this.showUpdatePassword = true;
-  }
-
-  // 🔁 RESET PASSWORD
   onUpdatePassword(): void {
   if (this.updatePasswordForm.valid) {
-    const token = 'dummyToken'; // Replace with actual token logic
     const newPassword = this.updatePasswordForm.get('newPassword')?.value;
 
-    this.authService.resetPassword(token, newPassword).subscribe({
-      next: () => {
+    this.authService.resetPassword(this.resetEmail, this.resetToken, newPassword).subscribe({
+      next: (res) => {
+        console.log('Reset password success:', res);
         this.showToastMessage('Password updated successfully.', 'success');
         setTimeout(() => {
           this.router.navigate(['/homepage']);
@@ -169,12 +186,13 @@ export class LoginComponent {
       error: (err) => {
         console.error('Reset password failed:', err);
         this.showToastMessage('Failed to reset password.', 'error');
-      },
+      }
     });
   }
 }
 
-  // ✅ Password match validators
+
+  // Validators
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password')?.value;
     const confirmPassword = form.get('confirmPassword')?.value;
@@ -187,7 +205,7 @@ export class LoginComponent {
     return newPassword === confirmNewPassword ? null : { mismatch: true };
   }
 
-  // 🧠 Input helpers
+  // Helpers
   blockNonNumeric(event: KeyboardEvent) {
     const pattern = /[0-9]/;
     if (!pattern.test(event.key)) {
@@ -195,7 +213,7 @@ export class LoginComponent {
     }
   }
 
-  // 👁️ Password visibility toggles
+  // Visibility toggles
   toggleShowPassword() {
     this.showPassword = !this.showPassword;
   }
@@ -215,17 +233,21 @@ export class LoginComponent {
   toggleShowConfirmNewPassword() {
     this.showConfirmNewPassword = !this.showConfirmNewPassword;
   }
-toastMessage = '';
-toastColor = 'bg-green-600'; // default to success
-showToast = false;
-showToastMessage(message: string, type: 'success' | 'error') {
-  this.toastMessage = message;
-  this.toastColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
-  this.showToast = true;
-  setTimeout(() => {
-    this.showToast = false;
-  }, 2000);
-}
 
-loginError: string = '';
+  // Toast message
+  showToastMessage(message: string, type: 'success' | 'error') {
+    this.toastMessage = message;
+    this.toastColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+    this.showToast = true;
+    setTimeout(() => {
+      this.showToast = false;
+    }, 2000);
+  }
+
+  // Back button from verification
+  onBackFromVerification(): void {
+    this.showVerification = false;
+    this.isLoginMode = true;
+    this.showUpdatePassword = false;
+  }
 }
