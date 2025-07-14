@@ -5,7 +5,8 @@
     <span class="font-bold text-3xl">Zenkit</span>
   </div>
 
- <div class="relative" (click)="toggleDropdown()" tabindex="0" (blur)="closeDropdown()">
+ <div class="relative" (click)="toggleDropdown()" tabindex="0" #dropdownRef>
+
   <!-- 👤 User Avatar -->
   <img src="https://img.icons8.com/color/48/user.png" alt="User Avatar"
     class="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-4 border-white shadow-md ring-2 ring-blue-500 hover:ring-blue-700 transition duration-300 ease-in-out cursor-pointer" />
@@ -31,13 +32,18 @@
 
 <!-- 🔐 Change Password Form -->
 <!-- 🔐 Change Password Modal -->
+<!-- 🔐 Change Password Modal -->
+<!-- 🔐 Change Password Modal -->
 <div *ngIf="showChangePasswordForm"
-     class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-  <div class="bg-white w-full max-w-3xl rounded-xl shadow-2xl p-10 relative flex flex-col items-center">
-
+     class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+  <div #modalRef
+       class="bg-white w-full max-w-3xl rounded-xl shadow-2xl p-10 relative z-60 flex flex-col items-center">
+       
     <!-- ❌ Close Button -->
     <button (click)="toggleChangePasswordForm()"
-            class="absolute top-4 right-4 text-gray-700 hover:text-red-600 text-2xl font-bold">&times;</button>
+            class="absolute top-4 right-4 text-gray-700 hover:text-red-600 text-2xl font-bold">
+      &times;
+    </button>
 
     <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">Change Password</h3>
 
@@ -47,7 +53,6 @@
       <input type="password" formControlName="newPassword" placeholder="New Password"
              class="w-full border border-gray-300 px-4 py-3 rounded-lg text-base" />
 
-      <!-- 🔴 Error / ✅ Success -->
       <div *ngIf="passwordError" class="text-red-600 text-sm font-medium">{{ passwordError }}</div>
       <div *ngIf="passwordSuccess" class="text-green-600 text-sm font-medium">{{ passwordSuccess }}</div>
 
@@ -58,6 +63,7 @@
     </form>
   </div>
 </div>
+
 
 
 

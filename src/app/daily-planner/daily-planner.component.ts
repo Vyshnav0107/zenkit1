@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-daily-planner',
@@ -8,14 +9,11 @@ import { Component, OnInit } from '@angular/core';
 export class DailyPlannerComponent implements OnInit {
 
   selectedDate: string = new Date().toISOString().substring(0, 10);
-
-  // Stores all tasks keyed by date string (yyyy-mm-dd)
   tasksByDate: { [date: string]: Task[] } = {};
 
   currentTasks: Task[] = [];
   previousDayCompletedTasks: Task[] = [];
 
-  // UI state
   newTaskTitle: string = '';
   newTaskTime: string = '';
   editTaskTitle: string = '';
@@ -26,6 +24,8 @@ export class DailyPlannerComponent implements OnInit {
 
   dropdownOpen: boolean = false;
 
+  constructor(private authService: AuthService) {}
+
   ngOnInit(): void {
     this.loadTasksForDate(this.selectedDate);
   }
@@ -34,21 +34,18 @@ export class DailyPlannerComponent implements OnInit {
     this.loadTasksForDate(this.selectedDate);
   }
 
-  // Loads tasks for the selected date, updates currentTasks and previousDayCompletedTasks
   private loadTasksForDate(dateStr: string): void {
     const today = new Date().toISOString().substring(0, 10);
     const prevDate = this.getPreviousDate(dateStr);
 
-    // Load tasks for current and previous day, or empty arrays if none
     this.currentTasks = this.tasksByDate[dateStr] ? [...this.tasksByDate[dateStr]] : [];
     this.previousDayCompletedTasks = this.tasksByDate[prevDate]
       ? this.tasksByDate[prevDate].filter(task => task.completed)
       : [];
 
-    // If selected date is in the past, auto-mark all tasks as completed
     if (dateStr < today) {
       this.currentTasks = this.currentTasks.map(task => ({ ...task, completed: true }));
-      this.tasksByDate[dateStr] = [...this.currentTasks]; // Persist auto-completed tasks
+      this.tasksByDate[dateStr] = [...this.currentTasks];
     }
   }
 
@@ -83,20 +80,35 @@ export class DailyPlannerComponent implements OnInit {
   addTask(): void {
     if (!this.newTaskTitle.trim() || !this.newTaskTime) return;
 
-    const newTask: Task = {
-      title: this.newTaskTitle.trim(),
-      time: this.newTaskTime,
-      completed: false
-    };
+    this.addTaskToBackend(this.newTaskTitle.trim(), this.selectedDate, this.newTaskTime);
 
-    if (!this.tasksByDate[this.selectedDate]) {
-      this.tasksByDate[this.selectedDate] = [];
-    }
-
-    this.tasksByDate[this.selectedDate].push(newTask);
     this.closeAddModal();
-    this.loadTasksForDate(this.selectedDate);
   }
+
+ addTaskToBackend(title: string, date: string, time: string = ''): void {
+  const newTask = {
+    title: title,
+    date: date,
+    time: time,
+    completed: false
+  };
+
+  this.authService.addReminder(newTask).subscribe({
+    next: (response) => {
+      console.log('Reminder added successfully:', response);
+
+      if (!this.tasksByDate[date]) {
+        this.tasksByDate[date] = [];
+      }
+
+      this.tasksByDate[date].push(response);
+      this.loadTasksForDate(this.selectedDate);
+    },
+    error: (err) => {
+      console.error('Error adding reminder:', err);
+    }
+  });
+}
 
   updateTask(): void {
     if (!this.editTaskTitle.trim() || !this.editTaskTime) return;
@@ -118,7 +130,6 @@ export class DailyPlannerComponent implements OnInit {
   }
 
   onCheckboxChange(): void {
-    // Sync current tasks with tasksByDate when checkbox toggled
     this.tasksByDate[this.selectedDate] = [...this.currentTasks];
   }
 

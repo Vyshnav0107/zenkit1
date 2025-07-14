@@ -1,4 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
@@ -8,7 +15,7 @@ import { AuthService } from '../auth.service';
   templateUrl: './homepage.component.html',
   styleUrls: ['./homepage.component.css']
 })
-export class HomepageComponent implements OnInit {
+export class HomepageComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -17,48 +24,44 @@ export class HomepageComponent implements OnInit {
 
   dropdownOpen = false;
   activeTool: string | null = null;
-
-  // User name from localStorage
   userFullName: string = '';
 
-  // Change Password
   showChangePasswordForm = false;
   changePasswordForm!: FormGroup;
   passwordError = '';
   passwordSuccess = '';
 
+  @ViewChild('dropdownRef') dropdownRef!: ElementRef;
+  @ViewChild('modalRef') modalRef!: ElementRef;
+
   ngOnInit() {
     this.userFullName = localStorage.getItem('userFullName') || 'Guest';
 
-    // Init change password form
     this.changePasswordForm = this.fb.group({
       currentPassword: ['', Validators.required],
       newPassword: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
+  ngOnDestroy(): void {
+    document.body.style.overflow = 'auto';
+  }
+
   toggleDropdown() {
-    this.dropdownOpen = !this.dropdownOpen;
+    if (!this.showChangePasswordForm) {
+      this.dropdownOpen = !this.dropdownOpen;
+    }
   }
 
   closeDropdown() {
-    setTimeout(() => {
-      this.dropdownOpen = false;
-    }, 150);
-  }
-
-  signOut() {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userFullName');
-    this.router.navigate(['/login']);
+    this.dropdownOpen = false;
   }
 
   toggleTool(toolName: string) {
-  if (this.activeTool !== toolName) {
-    this.activeTool = toolName;
+    if (this.activeTool !== toolName) {
+      this.activeTool = toolName;
+    }
   }
-  // Do nothing if the same tool is clicked again
-}
 
   togglePomodoro() {
     this.toggleTool('pomodoro');
@@ -73,6 +76,20 @@ export class HomepageComponent implements OnInit {
     this.passwordError = '';
     this.passwordSuccess = '';
     this.changePasswordForm.reset();
+
+    // Lock or unlock scroll
+    document.body.style.overflow = this.showChangePasswordForm ? 'hidden' : 'auto';
+
+    // Always close dropdown if modal opens
+    if (this.showChangePasswordForm) {
+      this.closeDropdown();
+    }
+  }
+
+  signOut() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userFullName');
+    this.router.navigate(['/login']);
   }
 
   onChangePassword() {
@@ -90,6 +107,18 @@ export class HomepageComponent implements OnInit {
           this.passwordSuccess = '';
         }
       });
+    }
+  }
+
+  // ✅ Protect dropdown from closing when modal is open
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const clickedInsideDropdown = this.dropdownRef?.nativeElement.contains(event.target);
+    const clickedInsideModal = this.modalRef?.nativeElement?.contains(event.target);
+    const modalOpen = this.showChangePasswordForm;
+
+    if (!clickedInsideDropdown && !clickedInsideModal && !modalOpen) {
+      this.closeDropdown();
     }
   }
 }
